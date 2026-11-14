@@ -30,34 +30,35 @@ function App() {
 
       {stage === "location" && <LocationStep onLocated={onLocated} />}
 
-      {stage === "fields" && location && (
-        <Map
-          key={`${location.lat},${location.lng}`}
-          location={location}
-          onChange={setSelectedFields}
-        >
-          <div className="map-panel">
-            <h3>Select your fields</h3>
-            <ol>
-              <li>Drag the map to move around.</li>
-              <li>Click a field to select it.</li>
-              <li>Shift-drag to select several fields at once.</li>
-              <li>When you have all your fields, click Continue.</li>
-            </ol>
-            <button
-              type="button"
-              disabled={count === 0}
-              onClick={() => setStage("form")}
-            >
-              {count === 0
-                ? "Select at least one field"
-                : `Continue with ${count} field${count === 1 ? "" : "s"}`}
-            </button>
-          </div>
-        </Map>
+      {stage !== "location" && location && (
+        <main className="field-workspace">
+          <Map
+            key={`${location.lat},${location.lng}`}
+            location={location}
+            onChange={setSelectedFields}
+          />
+          <aside className={`field-panel${stage === "form" ? " field-panel-details" : ""}`} aria-label={stage === "form" ? "Field details" : "Field selection"}>
+            {stage === "fields" ? <div className="map-panel">
+              <h3>Select your fields</h3>
+              <ol>
+                <li>Drag the map to move around.</li>
+                <li>Click a field to select it.</li>
+                <li>Shift-drag to select several fields at once.</li>
+                <li>When you have all your fields, click Continue.</li>
+              </ol>
+              <button
+                type="button"
+                disabled={count === 0}
+                onClick={() => setStage("form")}
+              >
+                {count === 0
+                  ? "Select at least one field"
+                  : `Continue with ${count} field${count === 1 ? "" : "s"}`}
+              </button>
+            </div> : <FieldDataForm fields={selectedFields} onClose={() => setStage("fields")} />}
+          </aside>
+        </main>
       )}
-
-      {stage === "form" && <FieldDataForm fields={selectedFields} />}
     </>
   );
 }
