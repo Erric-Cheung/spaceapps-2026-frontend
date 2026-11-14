@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import maplibregl, { type ExpressionSpecification, type GeoJSONSource } from 'maplibre-gl'
-import { Protocol } from 'pmtiles'
 import type { FeatureCollection, Point } from 'geojson'
-import { basemapStyle, BASEMAP_BOUNDS } from './basemap'
+import { basemapStyle } from './basemap'
 import { fetchFields, type BBox, type FieldFeature } from './data/fields'
 import { labelPoint } from './labelPoint'
 import { theme as t, themeCssVars } from './theme'
@@ -17,8 +16,6 @@ const NUMBERS = 'field-numbers'
 const FIELD_MINZOOM = 12
 const START = { center: [-79.52, 44.58] as [number, number], zoom: 12 } // just west of Orillia, Ontario
 const LAYER = { fill: 'field-fill', line: 'field-line', hover: 'field-hover', halo: 'field-selected-halo', sel: 'field-selected', num: 'field-num', numText: 'field-num-text' }
-
-maplibregl.addProtocol('pmtiles', new Protocol({ metadata: true }).tile)
 
 const sel: ExpressionSpecification = ['boolean', ['feature-state', 'selected'], false]
 const hov: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false]
@@ -46,7 +43,7 @@ export default function Map({ onChange }: Props) {
     for (const [k, v] of Object.entries(themeCssVars(t))) container.style.setProperty(k, v)
 
     const map = new maplibregl.Map({
-      container, style: basemapStyle(t), ...START, minZoom: 6, maxZoom: 17, maxBounds: BASEMAP_BOUNDS,
+      container, style: basemapStyle(t), ...START, minZoom: 3, maxZoom: 17,
       attributionControl: { compact: true }, dragRotate: false, pitchWithRotate: false,
       boxZoom: false, // shift-drag is box *select* here
       fadeDuration: 0, renderWorldCopies: false,
@@ -105,7 +102,7 @@ export default function Map({ onChange }: Props) {
         'circle-radius': 13 * t.textScale, 'circle-color': t.ink, 'circle-stroke-color': t.paper, 'circle-stroke-width': 2,
       } })
       map.addLayer({ id: LAYER.numText, type: 'symbol', source: NUMBERS, minzoom: FIELD_MINZOOM,
-        layout: { 'text-field': ['to-string', ['get', 'n']], 'text-font': t.font.medium, 'text-size': 14 * t.textScale, 'text-allow-overlap': true, 'text-ignore-placement': true },
+        layout: { 'text-field': ['to-string', ['get', 'n']], 'text-font': t.font.bold, 'text-size': 14 * t.textScale, 'text-allow-overlap': true, 'text-ignore-placement': true },
         paint: { 'text-color': t.paper },
       })
     }

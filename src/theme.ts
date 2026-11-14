@@ -11,9 +11,8 @@ export const theme = {
   field: '#D3D8BC',
   fieldLine: '#9EA67E',
   hero: '#D4A017',
-  strokeScale: 1.8,
   textScale: 1,
-  font: { medium: ['Noto Sans Medium'], css: "'Atkinson Hyperlegible Next', system-ui, sans-serif" },
+  font: { regular: ['Noto Sans Regular'], bold: ['Noto Sans Bold'], css: "'Atkinson Hyperlegible Next', system-ui, sans-serif" },
 }
 
 export type Theme = typeof theme

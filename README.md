@@ -9,7 +9,6 @@ for the visible area once you zoom in to level 12.
 ```sh
 cp .env.example .env     # API_URL: the SpaceApps data API
 npm install
-npm run basemap          # downloads public/maps/basemap.pmtiles (~180 MB), needs the pmtiles CLI
 npm run dev
 ```
 
@@ -18,10 +17,10 @@ to `API_URL`. The map uses `GET /fields?bbox=...`, following `nextCursor`.
 
 ## Basemap
 
-A Protomaps vector basemap of southern Ontario, styled with a quiet paper palette.
-It is too large for git, so `npm run basemap` downloads it. See
-[public/maps/README.md](public/maps/README.md). Place labels load fonts from the
-Protomaps font endpoint.
+Vector tiles and fonts come from [OpenFreeMap](https://openfreemap.org) (free, no API
+key, worldwide), styled in `src/basemap.ts` with a quiet paper palette. Nothing to
+download; the browser fetches only the visible tiles. Map data © OpenStreetMap
+contributors, OpenMapTiles.
 
 ## Production hosting
 
@@ -30,8 +29,7 @@ npm run build
 ```
 
 Serve `dist/` and configure the host to forward `/api/*` to the data API,
-stripping `/api` from the upstream path. Serve `.pmtiles` files with HTTP byte-range
-support (206 responses). The Vite development proxy is not part
+stripping `/api` from the upstream path. The Vite development proxy is not part
 of the production build. `npm run preview` does not configure this API routing.
 
 ## Checks
