@@ -18,6 +18,7 @@ import '../styles/Map.css'
 const FIELDS = 'fields'
 const NUMBERS = 'field-numbers'
 const FIELD_MINZOOM = 12
+const MIN_ZOOM = 10 // don't zoom out to the whole country; the search bar gets you around
 const START = { center: [-79.52, 44.58] as [number, number], zoom: 12 } // just west of Orillia, Ontario
 const LAYER = { fill: 'field-fill', line: 'field-line', hover: 'field-hover', halo: 'field-selected-halo', sel: 'field-selected', num: 'field-num', numText: 'field-num-text' }
 
@@ -76,7 +77,7 @@ export default function Map({ onChange, location, children }: Props) {
       ? { center: [location.lng, location.lat] as [number, number], zoom: 13 }
       : START
     const map = new maplibregl.Map({
-      container, style: basemapStyle(t), ...start, center: constrainMapCenter(start.center), minZoom: 3, maxZoom: 17,
+      container, style: basemapStyle(t), ...start, center: constrainMapCenter(start.center), minZoom: MIN_ZOOM, maxZoom: 17,
       transformCameraUpdate: ({ center }) => ({ center: new maplibregl.LngLat(...constrainMapCenter([center.lng, center.lat])) }),
       attributionControl: { compact: true, customAttribution: 'Search: <a href="https://photon.komoot.io">Photon</a> | <a href="https://www.geoboundaries.org/">geoBoundaries</a>' }, dragRotate: false, pitchWithRotate: false,
       boxZoom: false, // shift-drag is box *select* here
