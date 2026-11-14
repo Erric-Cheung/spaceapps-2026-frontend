@@ -1,0 +1,39 @@
+.field-workspace {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.field-workspace .field-map {
+    min-width: 0;
+}
+
+.field-panel {
+    flex: 0 0 clamp(300px, 28%, 420px);
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    border-left: 1px solid var(--border);
+    background: var(--paper);
+}
+
+@media (max-width: 767px) {
+    .field-workspace {
+        flex-direction: column;
+    }
+
+    .field-panel {
+        flex: 0 0 33.333vh;
+        flex-basis: 33.333dvh;
+        width: 100%;
+        border-left: 0;
+        border-top: 1px solid var(--border);
+        border-radius: 16px 16px 0 0;
+    }
+
+    .field-panel-details {
+        flex-basis: 66.667vh;
+        flex-basis: 66.667dvh;
+    }
+}

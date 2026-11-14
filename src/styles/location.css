@@ -1,0 +1,39 @@
+.location-step {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 420px;
+    margin: 48px auto;
+    padding: 0 16px;
+}
+
+.location-step h2 {
+    text-align: center;
+}
+
+.location-step > button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--brand);
+    color: var(--on-brand);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.location-step > button:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+.location-step .location-geo {
+    color: var(--surface);
+    border: 1px solid var(--border-strong);
+}
+
+.location-error {
+    color: var(--error);
+    font-size: var(--text-small);
+}

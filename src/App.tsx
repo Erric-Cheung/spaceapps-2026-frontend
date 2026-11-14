@@ -1,12 +1,12 @@
 import { useState } from "react";
 import Map from "./components/Map.tsx";
-import FieldDataForm from "./components/FieldDataForm.tsx";
+import FieldReviewForm from "./components/FieldReviewForm.tsx";
 import LocationStep from "./components/LocationStep.tsx";
 import SelectedFields from "./components/SelectedFields.tsx";
 import FieldSelectionPanel from "./components/FieldSelectionPanel.tsx";
 import type { FieldFeature } from "./data/fields";
 import type { GeoLocation } from "./data/geocode";
-import { fetchCropHistory } from "./data/cropHistory";
+import { fetchCropHistory, type CropHistoryResponse } from "./data/cropHistory";
 
 type Step = "location" | "fields" | "form";
 
@@ -16,6 +16,7 @@ function App() {
   const [selectedFields, setSelectedFields] = useState<FieldFeature[]>([]);
   const [isLoadingPredictions, setIsLoadingPredictions] = useState(false);
   const [predictionsError, setPredictionsError] = useState<string | null>(null);
+  const [cropHistory, setCropHistory] = useState<CropHistoryResponse | null>(null);
 
   const handleLocationSelected = (next: GeoLocation) => {
     setLocation(next);
@@ -30,7 +31,8 @@ function App() {
     setIsLoadingPredictions(true);
     setPredictionsError(null);
     try {
-      await fetchCropHistory(selectedFields.map(field => field.properties.id));
+      const history = await fetchCropHistory(selectedFields.map(field => field.properties.id));
+      setCropHistory(history);
       setStep("form");
     } catch {
       setPredictionsError("Could not load field history. Please try again.");
@@ -68,7 +70,11 @@ function App() {
                 <SelectedFields fields={selectedFields} />
               </>
             ) : (
-              <FieldDataForm fields={selectedFields} onClose={() => setStep("fields")} />
+              <FieldReviewForm
+                fields={selectedFields}
+                history={cropHistory}
+                onClose={() => setStep("fields")}
+              />
             )}
           </aside>
         </main>
