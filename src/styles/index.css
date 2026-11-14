@@ -101,9 +101,9 @@ fieldset {
 }
 
 .location-step .location-geo {
-    background: transparent;
     color: #58402E;
     border: 1px solid rgba(88, 64, 46, .25);
+    color: #fff;
 }
 
 .location-error {
