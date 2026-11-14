@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import maplibregl, { type ExpressionSpecification, type GeoJSONSource } from 'maplibre-gl'
 import type { FeatureCollection, Point } from 'geojson'
+import AddressSearch from './AddressSearch'
 import { basemapStyle } from './basemap'
+import type { Place } from './data/geocode'
 import { fetchFields, type BBox, type FieldFeature } from './data/fields'
 import { labelPoint } from './labelPoint'
 import { theme as t, themeCssVars } from './theme'
@@ -31,6 +33,8 @@ export default function Map({ onChange, location }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const onChangeRef = useRef(onChange)
   const retryRef = useRef(() => {})
+  const mapRef = useRef<maplibregl.Map | null>(null)
+  const pinRef = useRef<maplibregl.Marker | null>(null)
   const [status, setStatus] = useState<Status>('loading')
 
   useEffect(() => { onChangeRef.current = onChange })
@@ -50,10 +54,11 @@ export default function Map({ onChange, location }: Props) {
       : START
     const map = new maplibregl.Map({
       container, style: basemapStyle(t), ...start, minZoom: 3, maxZoom: 17,
-      attributionControl: { compact: true }, dragRotate: false, pitchWithRotate: false,
+      attributionControl: { compact: true, customAttribution: 'Search: <a href="https://photon.komoot.io">Photon</a>' }, dragRotate: false, pitchWithRotate: false,
       boxZoom: false, // shift-drag is box *select* here
       fadeDuration: 0, renderWorldCopies: false,
     })
+    mapRef.current = map
     map.touchZoomRotate.disableRotation()
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
     const resizeObserver = new ResizeObserver(() => map.resize())
@@ -199,13 +204,40 @@ export default function Map({ onChange, location }: Props) {
       retryRef.current = () => {}
       canvas.removeEventListener('mousedown', onMouseDown)
       resizeObserver.disconnect()
+      mapRef.current = null
+      pinRef.current = null
       map.remove()
     }
   }, [location])
 
+  // Addresses get a pin at street level; towns and roads are framed by their extent.
+  const goTo = (place: Place) => {
+    const map = mapRef.current
+    if (!map) return
+    pinRef.current?.remove()
+    pinRef.current = null
+    // Never land zoomed out past FIELD_MINZOOM, or no fields would load.
+    const fitted = place.bbox && place.kind !== 'address' ? map.cameraForBounds(place.bbox, { padding: 40, maxZoom: 15 }) : undefined
+    map.flyTo({
+      center: fitted?.center ?? place.center,
+      zoom: place.kind === 'address' ? 16 : Math.max(fitted?.zoom ?? 14, FIELD_MINZOOM),
+      duration: 1200,
+    })
+    if (place.kind === 'address') {
+      const el = document.createElement('div')
+      el.className = 'address-pin'
+      pinRef.current = new maplibregl.Marker({ element: el }).setLngLat(place.center).addTo(map)
+    }
+  }
+  const mapCenter = (): [number, number] => {
+    const c = mapRef.current?.getCenter()
+    return c ? [c.lng, c.lat] : START.center
+  }
+
   return (
     <section className="field-map" aria-label="Field selection map">
       <div ref={ref} className="field-map-canvas fp-root" />
+      <AddressSearch near={mapCenter} onPick={goTo} />
       {status !== 'idle' && (
         <div className="field-map-status" role={status === 'error' ? 'alert' : 'status'}>
           {status === 'zoom' && <p>Zoom in to see fields.</p>}

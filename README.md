@@ -7,13 +7,21 @@ for the visible area once you zoom in to level 12.
 ## Run locally
 
 ```sh
-cp .env.example .env     # API_URL: the SpaceApps data API
+cp .env.example .env     # API_URL: the SpaceApps data API; VITE_GEOCODER_URL: address search
 npm install
 npm run dev
 ```
 
 The API sends no CORS headers, so the browser calls `/api/*` and Vite forwards it
 to `API_URL`. The map uses `GET /fields?bbox=...`, following `nextCursor`.
+
+## Address search
+
+The search box on the map finds addresses, roads and towns in Canada with
+[Photon](https://photon.komoot.io) (OpenStreetMap data, no API key), set by
+`VITE_GEOCODER_URL`. Addresses drop a pin at street level; towns zoom in far
+enough for fields to load. Rural house numbers missing from OpenStreetMap fall
+back to the road.
 
 ## Basemap
 
