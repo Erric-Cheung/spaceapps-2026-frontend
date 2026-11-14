@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './App.css'
 import Map from './Map.tsx'
 import FieldDataForm from './FieldDataForm.tsx'
 import type { FieldFeature } from './data/fields'

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './App.css'
 import type { FieldFeature } from './data/fields'
 import { crops } from './data/crops'
 
