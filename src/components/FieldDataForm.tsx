@@ -5,26 +5,26 @@ import { crops } from '../data/crops'
 type Props = {
   fields: FieldFeature[]
   onClose: () => void
-  onSubmit?: (answers: { fieldId: string; crop: string; readyDate: string }[]) => void
+  onSubmit?: (fieldInputs: { fieldId: string; crop: string; readyDate: string }[]) => void
 }
 
-type FieldAnswer = { crop: string; readyDate: string }
+type FieldInput = { crop: string; readyDate: string }
 
-const emptyAnswer: FieldAnswer = { crop: '', readyDate: '' }
-const isComplete = (answer: FieldAnswer) => answer.crop !== '' && answer.readyDate !== ''
+const BLANK_FIELD_INPUT: FieldInput = { crop: '', readyDate: '' }
+const isComplete = (input: FieldInput) => input.crop !== '' && input.readyDate !== ''
 
 function FieldDataForm({ fields, onClose, onSubmit }: Props) {
-  const [answers, setAnswers] = useState<Record<string, FieldAnswer>>({})
+  const [fieldInputs, setFieldInputs] = useState<Record<string, FieldInput>>({})
 
-  const update = (id: string, patch: Partial<FieldAnswer>) =>
-    setAnswers(prev => ({
+  const update = (id: string, patch: Partial<FieldInput>) =>
+    setFieldInputs(prev => ({
       ...prev,
-      [id]: { ...emptyAnswer, ...prev[id], ...patch },
+      [id]: { ...BLANK_FIELD_INPUT, ...prev[id], ...patch },
     }))
 
   const allComplete =
     fields.length > 0 &&
-    fields.every(field => isComplete(answers[field.properties.id] ?? emptyAnswer))
+    fields.every(field => isComplete(fieldInputs[field.properties.id] ?? BLANK_FIELD_INPUT))
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -32,8 +32,8 @@ function FieldDataForm({ fields, onClose, onSubmit }: Props) {
     onSubmit?.(
       fields.map(field => {
         const id = field.properties.id
-        const answer = answers[id] ?? emptyAnswer
-        return { fieldId: id, crop: answer.crop, readyDate: answer.readyDate }
+        const input = fieldInputs[id] ?? BLANK_FIELD_INPUT
+        return { fieldId: id, crop: input.crop, readyDate: input.readyDate }
       }),
     )
   }
@@ -61,7 +61,7 @@ function FieldDataForm({ fields, onClose, onSubmit }: Props) {
         <div className='field-form-container'>
           {fields.map((field, index) => {
             const id = field.properties.id
-            const answer = answers[id] ?? emptyAnswer
+            const input = fieldInputs[id] ?? BLANK_FIELD_INPUT
             return (
               <fieldset key={id} className='field-card'>
                 <legend>Field {index + 1}</legend>
@@ -70,7 +70,7 @@ function FieldDataForm({ fields, onClose, onSubmit }: Props) {
                   Current crop
                   <select
                     required
-                    value={answer.crop}
+                    value={input.crop}
                     onChange={e => update(id, { crop: e.target.value })}
                   >
                     <option value=''>Select a crop</option>
@@ -85,7 +85,7 @@ function FieldDataForm({ fields, onClose, onSubmit }: Props) {
                   <input
                     type='date'
                     required
-                    value={answer.readyDate}
+                    value={input.readyDate}
                     onChange={e => update(id, { readyDate: e.target.value })}
                   />
                 </label>

@@ -8,34 +8,34 @@ import type { FieldFeature } from "./data/fields";
 import type { GeoLocation } from "./data/geocode";
 import { fetchCropHistory } from "./data/cropHistory";
 
-type Stage = "location" | "fields" | "form";
+type Step = "location" | "fields" | "form";
 
 function App() {
-  const [stage, setStage] = useState<Stage>("location");
+  const [step, setStep] = useState<Step>("location");
   const [location, setLocation] = useState<GeoLocation | null>(null);
   const [selectedFields, setSelectedFields] = useState<FieldFeature[]>([]);
-  const [predicting, setPredicting] = useState(false);
-  const [predictError, setPredictError] = useState<string | null>(null);
+  const [isLoadingPredictions, setIsLoadingPredictions] = useState(false);
+  const [predictionsError, setPredictionsError] = useState<string | null>(null);
 
-  const onLocated = (next: GeoLocation) => {
+  const handleLocationSelected = (next: GeoLocation) => {
     setLocation(next);
     setSelectedFields([]);
-    setStage("fields");
+    setStep("fields");
   };
 
-  const count = selectedFields.length;
+  const selectedCount = selectedFields.length;
 
-  const getPredictions = async () => {
-    if (count === 0) return;
-    setPredicting(true);
-    setPredictError(null);
+  const requestPredictions = async () => {
+    if (selectedCount === 0) return;
+    setIsLoadingPredictions(true);
+    setPredictionsError(null);
     try {
       await fetchCropHistory(selectedFields.map(field => field.properties.id));
-      setStage("form");
+      setStep("form");
     } catch {
-      setPredictError("Could not load field history. Please try again.");
+      setPredictionsError("Could not load field history. Please try again.");
     } finally {
-      setPredicting(false);
+      setIsLoadingPredictions(false);
     }
   };
 
@@ -47,28 +47,28 @@ function App() {
         </div>
       </header>
 
-      {stage === "location" && <LocationStep onLocated={onLocated} />}
+      {step === "location" && <LocationStep onLocated={handleLocationSelected} />}
 
-      {stage !== "location" && location && (
+      {step !== "location" && location && (
         <main className="field-workspace">
           <Map
             key={`${location.lat},${location.lng}`}
             location={location}
             onChange={setSelectedFields}
           />
-          <aside className={`field-panel${stage === "form" ? " field-panel-details" : ""}`} aria-label={stage === "form" ? "Field details" : "Field selection"}>
-            {stage === "fields" ? (
+          <aside className={`field-panel${step === "form" ? " field-panel-details" : ""}`} aria-label={step === "form" ? "Field details" : "Field selection"}>
+            {step === "fields" ? (
               <>
                 <FieldSelectionPanel
-                  count={count}
-                  predicting={predicting}
-                  error={predictError}
-                  onPredict={getPredictions}
+                  selectedCount={selectedCount}
+                  isLoadingPredictions={isLoadingPredictions}
+                  error={predictionsError}
+                  onPredict={requestPredictions}
                 />
                 <SelectedFields fields={selectedFields} />
               </>
             ) : (
-              <FieldDataForm fields={selectedFields} onClose={() => setStage("fields")} />
+              <FieldDataForm fields={selectedFields} onClose={() => setStep("fields")} />
             )}
           </aside>
         </main>
