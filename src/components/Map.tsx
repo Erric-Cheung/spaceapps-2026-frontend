@@ -6,6 +6,7 @@ import { basemapStyle } from '../lib/basemap'
 import type { GeoLocation, Place } from '../data/geocode'
 import { fetchFields, type BBox, type FieldFeature } from '../data/fields'
 import { labelPoint } from '../lib/labelPoint'
+import { constrainMapCenter } from '../lib/mapNavigation'
 import { createFieldReveal, ENTERING_FIELDS, ENTERING_LAYERS } from '../lib/fieldReveal'
 import { theme as t, themeCssVars } from '../lib/theme'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -75,8 +76,9 @@ export default function Map({ onChange, location, children }: Props) {
       ? { center: [location.lng, location.lat] as [number, number], zoom: 13 }
       : START
     const map = new maplibregl.Map({
-      container, style: basemapStyle(t), ...start, minZoom: 3, maxZoom: 17,
-      attributionControl: { compact: true, customAttribution: 'Search: <a href="https://photon.komoot.io">Photon</a>' }, dragRotate: false, pitchWithRotate: false,
+      container, style: basemapStyle(t), ...start, center: constrainMapCenter(start.center), minZoom: 3, maxZoom: 17,
+      transformCameraUpdate: ({ center }) => ({ center: new maplibregl.LngLat(...constrainMapCenter([center.lng, center.lat])) }),
+      attributionControl: { compact: true, customAttribution: 'Search: <a href="https://photon.komoot.io">Photon</a> | <a href="https://www.geoboundaries.org/">geoBoundaries</a>' }, dragRotate: false, pitchWithRotate: false,
       boxZoom: false, // shift-drag is box *select* here
       fadeDuration: 0, renderWorldCopies: false,
     })

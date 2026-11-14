@@ -46,3 +46,24 @@ of the production build. `npm run preview` does not configure this API routing.
 npm run build
 npm run lint
 ```
+
+## Map navigation
+
+Camera movement stays within a padded outline of the imported Canada/US/Mexico
+regions, including Alaska and Hawaii. The navigation envelope follows country
+coasts rather than individual field polygons, leaving room for coastal farms,
+islands, lakes and gaps between fields. Its 150 km buffer in Web Mercator gives
+roughly 40–150 km of actual offshore room depending on latitude. Zooming out can
+still show surrounding ocean; the camera centre cannot wander into the deep ocean
+or other continents. Mouse, touch, keyboard and search-driven camera changes use
+the same constraint.
+
+`src/data/mapCoverage.ts` is a simplified navigation envelope generated from the
+same geoBoundaries country masks and geographic tiles used by the data importer.
+It is a navigation aid, not a claim that every location contains a detected field.
+Attribution: geoBoundaries; Canada: OpenStreetMap/Wambacher (ODbL 1.0);
+US: US Census Bureau (public domain); Mexico: geoBoundaries/World Bank (CC-BY-4.0).
+Source metadata: https://www.geoboundaries.org/api/current/gbOpen/.
+
+Run navigation checks with `node --test tests/mapNavigation.test.ts` on Node 22.18+
+or a newer Node version with native TypeScript support.
