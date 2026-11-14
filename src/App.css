@@ -1,0 +1,13 @@
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+h1 {
+  padding: 14px 16px 0;
+  background: #f3f1e8;
+  color: #514b40;
+  font: 600 18px/1.4 system-ui, sans-serif;
+}
