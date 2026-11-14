@@ -21,10 +21,13 @@ const sel: ExpressionSpecification = ['boolean', ['feature-state', 'selected'], 
 const hov: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false]
 const contains = (outer: BBox, inner: BBox) => outer[0] <= inner[0] && outer[1] <= inner[1] && outer[2] >= inner[2] && outer[3] >= inner[3]
 
-type Props = { onChange?: (fields: FieldFeature[]) => void }
+type Props = {
+  onChange?: (fields: FieldFeature[]) => void
+  location?: { lat: number; lng: number }
+}
 type Status = 'idle' | 'zoom' | 'loading' | 'error'
 
-export default function Map({ onChange }: Props) {
+export default function Map({ onChange, location }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const onChangeRef = useRef(onChange)
   const retryRef = useRef(() => {})
@@ -42,8 +45,11 @@ export default function Map({ onChange }: Props) {
 
     for (const [k, v] of Object.entries(themeCssVars(t))) container.style.setProperty(k, v)
 
+    const start = location
+      ? { center: [location.lng, location.lat] as [number, number], zoom: 13 }
+      : START
     const map = new maplibregl.Map({
-      container, style: basemapStyle(t), ...START, minZoom: 3, maxZoom: 17,
+      container, style: basemapStyle(t), ...start, minZoom: 3, maxZoom: 17,
       attributionControl: { compact: true }, dragRotate: false, pitchWithRotate: false,
       boxZoom: false, // shift-drag is box *select* here
       fadeDuration: 0, renderWorldCopies: false,
@@ -195,7 +201,7 @@ export default function Map({ onChange }: Props) {
       resizeObserver.disconnect()
       map.remove()
     }
-  }, [])
+  }, [location])
 
   return (
     <section className="field-map" aria-label="Field selection map">

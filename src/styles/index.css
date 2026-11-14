@@ -59,6 +59,58 @@ fieldset {
     border: none;
 }
 
+.location-step {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 420px;
+    margin: 48px auto;
+    padding: 0 16px;
+}
+
+.location-step form {
+    display: flex;
+    gap: 8px;
+}
+
+.location-step input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid rgba(88, 64, 46, .25);
+    border-radius: 8px;
+    background: #fff;
+    color: #58402E;
+    font: inherit;
+}
+
+.location-step button {
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #58402E;
+    color: #F0EFEB;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.location-step button:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+.location-step .location-geo {
+    background: transparent;
+    color: #58402E;
+    border: 1px solid rgba(88, 64, 46, .25);
+}
+
+.location-error {
+    color: #A33A2B;
+    font-size: var(--text-small);
+}
+
 .field-form-container {
     display: flex;
     flex-direction: column;
