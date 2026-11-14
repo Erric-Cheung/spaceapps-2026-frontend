@@ -1,7 +1,5 @@
 import type { BBox } from './fields'
 
-export type GeoLocation = { lat: number; lng: number; label?: string }
-
 export type Place = {
   id: string
   label: string
@@ -10,6 +8,12 @@ export type Place = {
   center: [number, number]
   bbox?: BBox
 }
+
+/** Where the map opens. `place` is set when it came from search, so the map can frame it the same way. */
+export type GeoLocation = { lat: number; lng: number; label?: string; place?: Place }
+
+export const placeLabel = (p: Place) => (p.detail ? `${p.label}, ${p.detail}` : p.label)
+export const toLocation = (p: Place): GeoLocation => ({ lng: p.center[0], lat: p.center[1], label: placeLabel(p), place: p })
 
 type PhotonFeature = {
   geometry: { coordinates: [number, number] }
@@ -22,10 +26,11 @@ type PhotonFeature = {
 }
 
 const URL_BASE = import.meta.env.VITE_GEOCODER_URL
+const SOUTHERN_ONTARIO: [number, number] = [-80.5, 43.9]
 const LAYERS = ['house', 'street', 'city', 'locality', 'district', 'county']
 
 /** Addresses, roads and places in Canada matching `query`, biased toward `near` ([lng, lat]). */
-export async function searchPlaces(query: string, near: [number, number], signal?: AbortSignal): Promise<Place[]> {
+export async function searchPlaces(query: string, near: [number, number] = SOUTHERN_ONTARIO, signal?: AbortSignal): Promise<Place[]> {
   if (!URL_BASE) throw new Error('VITE_GEOCODER_URL is not set')
   const params = new URLSearchParams({ q: query, limit: '6', lon: String(near[0]), lat: String(near[1]), countrycode: 'CA' })
   for (const layer of LAYERS) params.append('layer', layer)
@@ -50,13 +55,4 @@ export async function searchPlaces(query: string, near: [number, number], signal
     })
   }
   return places
-}
-
-const SOUTHERN_ONTARIO: [number, number] = [-80.5, 43.9]
-
-/** Best match for a free-text address or place name. */
-export async function geocode(query: string, signal?: AbortSignal): Promise<GeoLocation> {
-  const [first] = await searchPlaces(query, SOUTHERN_ONTARIO, signal)
-  if (!first) throw new Error('No matching location found.')
-  return { lat: first.center[1], lng: first.center[0], label: first.detail ? `${first.label}, ${first.detail}` : first.label }
 }

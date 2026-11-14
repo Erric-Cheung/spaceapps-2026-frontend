@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import maplibregl, { type ExpressionSpecification, type GeoJSONSource } from 'maplibre-gl'
 import type { FeatureCollection, Point } from 'geojson'
 import AddressSearch from './AddressSearch'
 import { basemapStyle } from '../lib/basemap'
-import type { Place } from '../data/geocode'
+import type { GeoLocation, Place } from '../data/geocode'
 import { fetchFields, type BBox, type FieldFeature } from '../data/fields'
 import { labelPoint } from '../lib/labelPoint'
 import { theme as t, themeCssVars } from '../lib/theme'
@@ -23,9 +23,27 @@ const sel: ExpressionSpecification = ['boolean', ['feature-state', 'selected'], 
 const hov: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false]
 const contains = (outer: BBox, inner: BBox) => outer[0] <= inner[0] && outer[1] <= inner[1] && outer[2] >= inner[2] && outer[3] >= inner[3]
 
+// Addresses get a pin at street level; towns and roads are framed by their extent.
+function showPlace(map: maplibregl.Map, place: Place, pinRef: RefObject<maplibregl.Marker | null>, duration: number) {
+  pinRef.current?.remove()
+  pinRef.current = null
+  // Never land zoomed out past FIELD_MINZOOM, or no fields would load.
+  const fitted = place.bbox && place.kind !== 'address' ? map.cameraForBounds(place.bbox, { padding: 40, maxZoom: 15 }) : undefined
+  map.flyTo({
+    center: fitted?.center ?? place.center,
+    zoom: place.kind === 'address' ? 16 : Math.max(fitted?.zoom ?? 14, FIELD_MINZOOM),
+    duration,
+  })
+  if (place.kind === 'address') {
+    const el = document.createElement('div')
+    el.className = 'address-pin'
+    pinRef.current = new maplibregl.Marker({ element: el }).setLngLat(place.center).addTo(map)
+  }
+}
+
 type Props = {
   onChange?: (fields: FieldFeature[]) => void
-  location?: { lat: number; lng: number; label?: string }
+  location?: GeoLocation
   children?: ReactNode
 }
 type Status = 'idle' | 'zoom' | 'loading' | 'error'
@@ -60,6 +78,7 @@ export default function Map({ onChange, location, children }: Props) {
       fadeDuration: 0, renderWorldCopies: false,
     })
     mapRef.current = map
+    if (location?.place) showPlace(map, location.place, pinRef, 0)
     map.touchZoomRotate.disableRotation()
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
     const resizeObserver = new ResizeObserver(() => map.resize())
@@ -211,25 +230,7 @@ export default function Map({ onChange, location, children }: Props) {
     }
   }, [location])
 
-  // Addresses get a pin at street level; towns and roads are framed by their extent.
-  const goTo = (place: Place) => {
-    const map = mapRef.current
-    if (!map) return
-    pinRef.current?.remove()
-    pinRef.current = null
-    // Never land zoomed out past FIELD_MINZOOM, or no fields would load.
-    const fitted = place.bbox && place.kind !== 'address' ? map.cameraForBounds(place.bbox, { padding: 40, maxZoom: 15 }) : undefined
-    map.flyTo({
-      center: fitted?.center ?? place.center,
-      zoom: place.kind === 'address' ? 16 : Math.max(fitted?.zoom ?? 14, FIELD_MINZOOM),
-      duration: 1200,
-    })
-    if (place.kind === 'address') {
-      const el = document.createElement('div')
-      el.className = 'address-pin'
-      pinRef.current = new maplibregl.Marker({ element: el }).setLngLat(place.center).addTo(map)
-    }
-  }
+  const goTo = (place: Place) => { if (mapRef.current) showPlace(mapRef.current, place, pinRef, 1200) }
   const mapCenter = (): [number, number] => {
     const c = mapRef.current?.getCenter()
     return c ? [c.lng, c.lat] : START.center

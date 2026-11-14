@@ -1,10 +1,10 @@
-import { useState, type FormEvent } from 'react'
-import { geocode, type GeoLocation } from '../data/geocode'
+import { useState } from 'react'
+import AddressSearch from './AddressSearch'
+import { toLocation, type GeoLocation } from '../data/geocode'
 
 type Props = { onLocated: (location: GeoLocation) => void }
 
 function LocationStep({ onLocated }: Props) {
-  const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,34 +28,15 @@ function LocationStep({ onLocated }: Props) {
     )
   }
 
-  const submit = async (e: FormEvent) => {
-    e.preventDefault()
-    const q = query.trim()
-    if (!q) return
-    setBusy(true)
-    setError(null)
-    try {
-      onLocated(await geocode(q))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not find that location.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
   return (
     <section className='location-step'>
       <h2>Enter your location to get&nbsp;started</h2>
-      <form onSubmit={submit}>
-        <input
-          type='text'
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder='City, address, or region'
-          aria-label='Location'
-        />
-        <button type='submit' disabled={busy}>Find fields</button>
-      </form>
+      <AddressSearch
+        className='address-search--page'
+        placeholder='City, address, or region'
+        buttonLabel='Find fields'
+        onPick={place => onLocated(toLocation(place))}
+      />
       <button type='button' className='location-geo' onClick={useMyLocation} disabled={busy}>
         Use my location
       </button>

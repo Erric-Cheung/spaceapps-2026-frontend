@@ -1,16 +1,22 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { searchPlaces, type Place } from '../data/geocode'
+import { placeLabel, searchPlaces, type Place } from '../data/geocode'
+import '../styles/AddressSearch.css'
 
 type Props = {
-  /** Current map centre, so nearby matches rank first. */
-  near: () => [number, number]
+  /** Current map centre, so nearby matches rank first. Defaults to southern Ontario. */
+  near?: () => [number, number] | undefined
   onPick: (place: Place) => void
   /** Pre-filled search text, e.g. the location chosen on the splash screen. */
   initialQuery?: string
+  placeholder?: string
+  buttonLabel?: string
+  className?: string
 }
 
 // Suggestions appear while typing; Enter picks the highlighted (or first) one.
-export default function AddressSearch({ near, onPick, initialQuery = '' }: Props) {
+export default function AddressSearch({
+  near, onPick, initialQuery = '', placeholder = 'Address or town, like Orillia', buttonLabel = 'Search', className = '',
+}: Props) {
   const listId = useId()
   const [query, setQuery] = useState(initialQuery)
   const [places, setPlaces] = useState<Place[]>([])
@@ -28,7 +34,7 @@ export default function AddressSearch({ near, onPick, initialQuery = '' }: Props
     const controller = new AbortController()
     request.current = controller
     try {
-      const found = await searchPlaces(text, nearRef.current(), controller.signal)
+      const found = await searchPlaces(text, nearRef.current?.(), controller.signal)
       setPlaces(found)
       setActive(-1)
       setMessage(found.length ? null : `No matches for "${text}" in Canada. Check the spelling or try a nearby town.`)
@@ -53,7 +59,7 @@ export default function AddressSearch({ near, onPick, initialQuery = '' }: Props
   const pick = (place: Place) => {
     clearTimeout(timer.current)
     request.current?.abort()
-    setQuery(place.detail ? `${place.label}, ${place.detail}` : place.label)
+    setQuery(placeLabel(place))
     setOpen(false)
     setMessage(null)
     onPick(place)
@@ -79,17 +85,17 @@ export default function AddressSearch({ near, onPick, initialQuery = '' }: Props
   const showList = open && (places.length > 0 || message)
 
   return (
-    <form className="address-search" role="search" onSubmit={submit}>
+    <form className={`address-search ${className}`.trim()} role="search" onSubmit={submit}>
       <label htmlFor={`${listId}-input`} className="sr-only">Address or town</label>
       <div className="address-search-row">
         <input
-          id={`${listId}-input`} type="search" value={query} placeholder="Address or town, like Orillia"
+          id={`${listId}-input`} type="search" value={query} placeholder={placeholder}
           autoComplete="off" role="combobox" aria-expanded={!!showList} aria-controls={listId}
           aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
           onChange={e => onType(e.target.value)}
           onFocus={() => setOpen(true)} onBlur={() => setOpen(false)} onKeyDown={onKeyDown}
         />
-        <button type="submit">Search</button>
+        <button type="submit">{buttonLabel}</button>
       </div>
       {showList && (
         <div className="address-search-results">
