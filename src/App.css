@@ -5,9 +5,17 @@
   height: 100dvh;
 }
 
+body {
+  background: #F0EFEB;
+  color: #58402E;
+  font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
 h1 {
-  padding: 14px 16px 0;
-  background: #f3f1e8;
-  color: #514b40;
-  font: 600 18px/1.4 system-ui, sans-serif;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(88, 64, 46, .16);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
 }

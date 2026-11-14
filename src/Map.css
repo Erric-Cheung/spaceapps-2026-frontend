@@ -1,74 +1,57 @@
+/* --fp-* variables are set on the map container from src/theme.ts. */
 .field-map {
-  display: flex;
-  flex-direction: column;
+  position: relative;
   flex: 1;
   min-height: 0;
   width: 100%;
 }
 
+.field-map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.fp-root { background: var(--fp-paper); font-family: var(--fp-font); }
+.fp-root .maplibregl-canvas { outline: none; }
+.fp-box {
+  position: absolute;
+  border: 1.5px dashed var(--fp-ink);
+  background: color-mix(in srgb, var(--fp-hero) 18%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+.fp-root .maplibregl-ctrl-attrib { background: color-mix(in srgb, var(--fp-paper) 85%, transparent); color: var(--fp-muted); font-size: 10px; }
+.fp-root .maplibregl-ctrl-attrib a { color: var(--fp-muted); }
+.fp-root .maplibregl-ctrl-group { background: var(--fp-paper); box-shadow: 0 0 0 1px var(--fp-grid); border-radius: 10px; }
+.fp-root .maplibregl-ctrl-group button + button { border-top-color: var(--fp-grid); }
+
 .field-map-status {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 12px;
-  padding: 12px 16px;
-  background: #f3f1e8;
-  color: #514b40;
-  font: 14px/1.5 system-ui, sans-serif;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 1px solid color-mix(in srgb, #58402E 16%, transparent);
+  border-radius: 8px;
+  background: #F0EFEB;
+  color: #58402E;
+  font: 700 15px/1.4 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  z-index: 3;
 }
 
 .field-map-status button {
-  padding: 6px 12px;
-  border: 1px solid #24613c;
-  border-radius: 4px;
-  background: white;
-  color: #24613c;
+  margin-right: -8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #58402E;
+  color: #F0EFEB;
+  font: inherit;
   cursor: pointer;
-  font: inherit;
-}
-
-.field-map-canvas {
-  flex: 1;
-  min-height: 0;
-}
-
-.field-map-select {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-}
-
-.field-map-select select {
-  min-width: 0;
-  max-width: 100%;
-  padding: 7px 10px;
-  border: 1px solid #c5beae;
-  border-radius: 4px;
-  color: #514b40;
-  background: #faf9f4;
-  font: inherit;
-}
-
-.field-map-warning {
-  padding: 8px 16px;
-  background: #f7e4d1;
-  color: #713d24;
-  font: 14px/1.5 system-ui, sans-serif;
-}
-
-.field-map .maplibregl-popup-content {
-  padding: 16px 24px 16px 16px;
-  color: #514b40;
-  background: #faf9f4;
-  font: 14px/1.5 system-ui, sans-serif;
-}
-
-.field-map .maplibregl-popup-content p {
-  margin-top: 6px;
-}
-
-@media (max-width: 600px) {
-  .field-map-select { margin-left: 0; width: 100%; }
-  .field-map-select select { flex: 1; }
 }
