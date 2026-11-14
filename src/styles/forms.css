@@ -130,13 +130,15 @@
 
 .form-actions {
     flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
     padding: 12px 16px max(12px, env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
 }
 
 .form-submit {
-    width: 100%;
-    padding: 12px 18px;
+    width: auto;
+    padding: 12px 22px;
     border: 0;
     border-radius: 999px;
     background: var(--brand);

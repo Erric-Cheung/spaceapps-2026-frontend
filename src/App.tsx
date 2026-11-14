@@ -52,13 +52,13 @@ function App() {
       {step === "location" && <LocationStep onLocated={handleLocationSelected} />}
 
       {step !== "location" && location && (
-        <main className="field-workspace">
+        <main className={`field-workspace${step === "form" ? " field-workspace--form" : ""}`}>
           <Map
             key={`${location.lat},${location.lng}`}
             location={location}
             onChange={setSelectedFields}
           />
-          <aside className={`field-panel${step === "form" ? " field-panel-details" : ""}`} aria-label={step === "form" ? "Field details" : "Field selection"}>
+          <aside className="field-panel" aria-label={step === "form" ? "Field details" : "Field selection"}>
             {step === "fields" ? (
               <>
                 <FieldSelectionPanel

@@ -18,6 +18,19 @@
     background: var(--paper);
 }
 
+/* Review step: hide the map and let the form take the full width. */
+.field-workspace--form .field-map {
+    display: none;
+}
+
+.field-workspace--form .field-panel {
+    flex: 1 1 auto;
+    flex-basis: auto;
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+}
+
 @media (max-width: 767px) {
     .field-workspace {
         flex-direction: column;
@@ -32,8 +45,4 @@
         border-radius: 16px 16px 0 0;
     }
 
-    .field-panel-details {
-        flex-basis: 66.667vh;
-        flex-basis: 66.667dvh;
-    }
 }
