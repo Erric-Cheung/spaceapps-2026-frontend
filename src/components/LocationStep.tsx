@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { geocode, type GeoLocation } from './data/geocode'
+import { geocode, type GeoLocation } from '../data/geocode'
 
 type Props = { onLocated: (location: GeoLocation) => void }
 
@@ -45,7 +45,7 @@ function LocationStep({ onLocated }: Props) {
 
   return (
     <section className='location-step'>
-      <h2>Where are your fields?</h2>
+      <h2>Enter your location to get&nbsp;started</h2>
       <form onSubmit={submit}>
         <input
           type='text'

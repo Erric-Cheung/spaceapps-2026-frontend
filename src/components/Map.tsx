@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import maplibregl, { type ExpressionSpecification, type GeoJSONSource } from 'maplibre-gl'
 import type { FeatureCollection, Point } from 'geojson'
 import AddressSearch from './AddressSearch'
-import { basemapStyle } from './basemap'
-import type { Place } from './data/geocode'
-import { fetchFields, type BBox, type FieldFeature } from './data/fields'
-import { labelPoint } from './labelPoint'
-import { theme as t, themeCssVars } from './theme'
+import { basemapStyle } from '../lib/basemap'
+import type { Place } from '../data/geocode'
+import { fetchFields, type BBox, type FieldFeature } from '../data/fields'
+import { labelPoint } from '../lib/labelPoint'
+import { theme as t, themeCssVars } from '../lib/theme'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import './styles/Map.css'
+import '../styles/Map.css'
 
 // Click a field to toggle it, shift-drag to box-select. Badges number fields in selection order.
 // Fields load from the API for the visible area once zoomed in to FIELD_MINZOOM.
@@ -25,11 +25,12 @@ const contains = (outer: BBox, inner: BBox) => outer[0] <= inner[0] && outer[1] 
 
 type Props = {
   onChange?: (fields: FieldFeature[]) => void
-  location?: { lat: number; lng: number }
+  location?: { lat: number; lng: number; label?: string }
+  children?: ReactNode
 }
 type Status = 'idle' | 'zoom' | 'loading' | 'error'
 
-export default function Map({ onChange, location }: Props) {
+export default function Map({ onChange, location, children }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const onChangeRef = useRef(onChange)
   const retryRef = useRef(() => {})
@@ -237,7 +238,8 @@ export default function Map({ onChange, location }: Props) {
   return (
     <section className="field-map" aria-label="Field selection map">
       <div ref={ref} className="field-map-canvas fp-root" />
-      <AddressSearch near={mapCenter} onPick={goTo} />
+      <AddressSearch near={mapCenter} onPick={goTo} initialQuery={location?.label} />
+      {children}
       {status !== 'idle' && (
         <div className="field-map-status" role={status === 'error' ? 'alert' : 'status'}>
           {status === 'zoom' && <p>Zoom in to see fields.</p>}

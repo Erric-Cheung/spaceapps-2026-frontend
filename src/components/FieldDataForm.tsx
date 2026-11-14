@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { FieldFeature } from './data/fields'
-import { crops } from './data/crops'
+import type { FieldFeature } from '../data/fields'
+import { crops } from '../data/crops'
 
 type Props = { fields: FieldFeature[] }
 

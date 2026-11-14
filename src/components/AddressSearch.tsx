@@ -1,16 +1,18 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { searchPlaces, type Place } from './data/geocode'
+import { searchPlaces, type Place } from '../data/geocode'
 
 type Props = {
   /** Current map centre, so nearby matches rank first. */
   near: () => [number, number]
   onPick: (place: Place) => void
+  /** Pre-filled search text, e.g. the location chosen on the splash screen. */
+  initialQuery?: string
 }
 
 // Suggestions appear while typing; Enter picks the highlighted (or first) one.
-export default function AddressSearch({ near, onPick }: Props) {
+export default function AddressSearch({ near, onPick, initialQuery = '' }: Props) {
   const listId = useId()
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery)
   const [places, setPlaces] = useState<Place[]>([])
   const [active, setActive] = useState(-1)
   const [open, setOpen] = useState(false)

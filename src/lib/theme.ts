@@ -1,4 +1,4 @@
-// Palette from Lieflat Charts' "palm" preset (PolyForm Noncommercial 1.0.0); replace before commercial use.
+// Palette from Lieflat Charts' "palm" preset (PolyForm Noncommercial 1.0.0);
 export const theme = {
   paper: '#F0EFEB',
   ink: '#58402E',
