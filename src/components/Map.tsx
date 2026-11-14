@@ -6,6 +6,7 @@ import { basemapStyle } from '../lib/basemap'
 import type { GeoLocation, Place } from '../data/geocode'
 import { fetchFields, type BBox, type FieldFeature } from '../data/fields'
 import { labelPoint } from '../lib/labelPoint'
+import { createFieldReveal, ENTERING_FIELDS, ENTERING_LAYERS } from '../lib/fieldReveal'
 import { theme as t, themeCssVars } from '../lib/theme'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import '../styles/Map.css'
@@ -65,6 +66,8 @@ export default function Map({ onChange, location, children }: Props) {
     const loaded: BBox[] = []
     let request: AbortController | undefined
     let hoverId: string | null = null
+    let reveal: ReturnType<typeof createFieldReveal> | undefined
+    let disposed = false
 
     for (const [k, v] of Object.entries(themeCssVars(t))) container.style.setProperty(k, v)
 
@@ -84,8 +87,14 @@ export default function Map({ onChange, location, children }: Props) {
     const resizeObserver = new ResizeObserver(() => map.resize())
     resizeObserver.observe(container)
 
+    let resolveLayers: () => void
+    const layersReady = new Promise<void>(resolve => { resolveLayers = resolve })
     const ready = () => !!map.getLayer(LAYER.fill)
-    const state = (id: string, s: Record<string, boolean>) => { if (ready()) map.setFeatureState({ source: FIELDS, id }, s) }
+    const state = (id: string, s: Record<string, boolean>) => {
+      if (!ready()) return
+      map.setFeatureState({ source: FIELDS, id }, s)
+      map.setFeatureState({ source: ENTERING_FIELDS, id }, s)
+    }
     const numberPoints = (): FeatureCollection<Point> => ({
       type: 'FeatureCollection',
       features: [...selected.values()].map((f, i) => ({
@@ -111,24 +120,30 @@ export default function Map({ onChange, location, children }: Props) {
       // tolerance 0: no simplification, so neighbouring outlines don't cross at lower zooms
       map.addSource(FIELDS, { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, promoteId: 'id', tolerance: 0,
         attribution: 'Fields: Fields of the World 2025 (CC-BY-4.0)' })
+      map.addSource(ENTERING_FIELDS, { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, promoteId: 'id', tolerance: 0 })
       map.addSource(NUMBERS, { type: 'geojson', data: numberPoints() })
-      const s = { source: FIELDS, minzoom: FIELD_MINZOOM }
-      map.addLayer({ id: LAYER.fill, type: 'fill', ...s, paint: {
-        'fill-color': ['case', sel, t.hero, t.field],
-        'fill-opacity': ['case', sel, 0.95, hov, 1, 0.85],
-      } })
-      map.addLayer({ id: LAYER.line, type: 'line', ...s, paint: {
-        'line-color': t.fieldLine, 'line-width': ['interpolate', ['linear'], ['zoom'], FIELD_MINZOOM, 0.5, 16, 1.4],
-      } })
-      map.addLayer({ id: LAYER.hover, type: 'line', ...s, paint: {
-        'line-color': t.ink, 'line-width': 1.2, 'line-opacity': ['case', hov, 0.9, 0],
-      } })
-      map.addLayer({ id: LAYER.halo, type: 'line', ...s, paint: {
-        'line-color': t.paper, 'line-width': 4, 'line-opacity': ['case', sel, 0.95, 0],
-      } })
-      map.addLayer({ id: LAYER.sel, type: 'line', ...s, paint: {
-        'line-color': t.ink, 'line-width': 2, 'line-opacity': ['case', sel, 1, 0],
-      } })
+      const addFieldLayers = (source: string, ids: Pick<typeof LAYER, 'fill' | 'line' | 'hover' | 'halo' | 'sel'>, entering = false) => {
+        const s = { source, minzoom: FIELD_MINZOOM }
+        map.addLayer({ id: ids.fill, type: 'fill', ...s, paint: {
+          'fill-color': ['case', sel, t.hero, t.field],
+          'fill-opacity': entering ? 0 : ['case', sel, 0.95, hov, 1, 0.85],
+        } })
+        map.addLayer({ id: ids.line, type: 'line', ...s, paint: {
+          'line-color': t.fieldLine, 'line-width': ['interpolate', ['linear'], ['zoom'], FIELD_MINZOOM, 0.5, 16, 1.4],
+          'line-opacity': entering ? 0 : 1,
+        } })
+        map.addLayer({ id: ids.hover, type: 'line', ...s, paint: {
+          'line-color': t.ink, 'line-width': 1.2, 'line-opacity': ['case', hov, 0.9, 0],
+        } })
+        map.addLayer({ id: ids.halo, type: 'line', ...s, paint: {
+          'line-color': t.paper, 'line-width': 4, 'line-opacity': ['case', sel, 0.95, 0],
+        } })
+        map.addLayer({ id: ids.sel, type: 'line', ...s, paint: {
+          'line-color': t.ink, 'line-width': 2, 'line-opacity': ['case', sel, 1, 0],
+        } })
+      }
+      addFieldLayers(FIELDS, LAYER)
+      addFieldLayers(ENTERING_FIELDS, ENTERING_LAYERS, true)
       map.addLayer({ id: LAYER.num, type: 'circle', source: NUMBERS, minzoom: FIELD_MINZOOM, paint: {
         'circle-radius': 13 * t.textScale, 'circle-color': t.ink, 'circle-stroke-color': t.paper, 'circle-stroke-width': 2,
       } })
@@ -136,12 +151,14 @@ export default function Map({ onChange, location, children }: Props) {
         layout: { 'text-field': ['to-string', ['get', 'n']], 'text-font': t.font.bold, 'text-size': 14 * t.textScale, 'text-allow-overlap': true, 'text-ignore-placement': true },
         paint: { 'text-color': t.paper },
       })
+      reveal = createFieldReveal(map, FIELDS)
+      resolveLayers()
     }
 
     // Fetch the visible area unless an earlier request already covered it. Fields accumulate,
     // so panning back is instant and selections stay valid.
     async function loadView() {
-      if (!ready()) return
+      if (disposed) return
       if (map.getZoom() < FIELD_MINZOOM) { request?.abort(); setStatus('zoom'); return }
       const b = map.getBounds()
       const bbox: BBox = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]
@@ -152,9 +169,12 @@ export default function Map({ onChange, location, children }: Props) {
       setStatus('loading')
       try {
         const features = await fetchFields(bbox, controller.signal)
+        await layersReady
+        if (controller.signal.aborted || disposed) return
+        const fresh = features.filter(f => !byId.has(String(f.properties.id)))
         for (const f of features) byId.set(String(f.properties.id), f)
-        loaded.push(bbox);
-        (map.getSource(FIELDS) as GeoJSONSource).setData({ type: 'FeatureCollection', features: [...byId.values()] })
+        loaded.push(bbox)
+        reveal?.add(fresh)
         setStatus('idle')
       } catch {
         if (!controller.signal.aborted) setStatus('error')
@@ -162,10 +182,12 @@ export default function Map({ onChange, location, children }: Props) {
     }
     retryRef.current = () => { void loadView() }
 
-    map.once('style.load', () => { addLayers(); void loadView() })
+    map.once('style.load', addLayers)
     map.on('moveend', () => { void loadView() })
+    // Fetch fields alongside the basemap style/tiles, without blocking either.
+    void loadView()
 
-    const pick = (p: maplibregl.PointLike) => (ready() ? map.queryRenderedFeatures(p, { layers: [LAYER.fill] })[0] : undefined)
+    const pick = (p: maplibregl.PointLike) => (ready() ? map.queryRenderedFeatures(p, { layers: [LAYER.fill, ENTERING_LAYERS.fill] })[0] : undefined)
 
     map.on('click', e => {
       const f = pick(e.point)
@@ -211,7 +233,7 @@ export default function Map({ onChange, location, children }: Props) {
         const p = new maplibregl.Point(ev.clientX - r.left, ev.clientY - r.top)
         if (Math.abs(p.x - start.x) < 4 && Math.abs(p.y - start.y) < 4) return
         if (!ready()) return
-        for (const f of map.queryRenderedFeatures([start, p], { layers: [LAYER.fill] })) select(String(f.properties.id))
+        for (const f of map.queryRenderedFeatures([start, p], { layers: [LAYER.fill, ENTERING_LAYERS.fill] })) select(String(f.properties.id))
         emitChange()
       }
       window.addEventListener('mousemove', move)
@@ -220,7 +242,10 @@ export default function Map({ onChange, location, children }: Props) {
     canvas.addEventListener('mousedown', onMouseDown)
 
     return () => {
+      disposed = true
       request?.abort()
+      resolveLayers()
+      reveal?.destroy()
       retryRef.current = () => {}
       canvas.removeEventListener('mousedown', onMouseDown)
       resizeObserver.disconnect()
