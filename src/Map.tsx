@@ -6,7 +6,7 @@ import { fetchFields, type BBox, type FieldFeature } from './data/fields'
 import { labelPoint } from './labelPoint'
 import { theme as t, themeCssVars } from './theme'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import './Map.css'
+import './styles/Map.css'
 
 // Click a field to toggle it, shift-drag to box-select. Badges number fields in selection order.
 // Fields load from the API for the visible area once zoomed in to FIELD_MINZOOM.

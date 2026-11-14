@@ -40,7 +40,7 @@
   border-radius: 8px;
   background: #F0EFEB;
   color: #58402E;
-  font: 700 15px/1.4 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  font: 700 15px/1.4 var(--font-sans);
   z-index: 3;
 }
 

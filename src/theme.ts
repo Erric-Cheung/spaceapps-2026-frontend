@@ -12,7 +12,7 @@ export const theme = {
   fieldLine: '#9EA67E',
   hero: '#D4A017',
   textScale: 1,
-  font: { regular: ['Noto Sans Regular'], bold: ['Noto Sans Bold'], css: "'Atkinson Hyperlegible Next', system-ui, sans-serif" },
+  font: { regular: ['Noto Sans Regular'], bold: ['Noto Sans Bold'], css: "'Manrope', system-ui, sans-serif" },
 }
 
 export type Theme = typeof theme
