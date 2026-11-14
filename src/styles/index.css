@@ -164,11 +164,53 @@ fieldset {
     cursor: default;
 }
 
+.form-field-header {
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid rgba(88, 64, 46, .16);
+}
+
+.form-field-header h2 {
+    padding: 0;
+    margin-bottom: 6px;
+}
+
+.form-field-header p {
+    max-width: 60ch;
+    color: rgba(88, 64, 46, .78);
+    line-height: 1.5;
+}
+
 .field-form-container {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 0 16px 16px;
+    padding: 16px 16px 96px;
+}
+
+.form-submit {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 20;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: #58402E;
+    color: #F0EFEB;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(88, 64, 46, .28);
+}
+
+.form-submit:hover:not(:disabled) {
+    background: #6B4F39;
+}
+
+.form-submit:disabled {
+    opacity: .5;
+    cursor: default;
+    box-shadow: none;
 }
 
 .field-card {
