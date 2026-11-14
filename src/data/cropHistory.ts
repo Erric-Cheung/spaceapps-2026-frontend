@@ -17,8 +17,40 @@ export type CropYear = {
   crop: string
   code: number
   isCrop: boolean
+  /** Crop group shared by both countries, e.g. "corn". */
+  group?: string
+  /** The crop group in plain words, e.g. "Corn". */
+  groupLabel?: string
   share: number
+  /** Share of the field under any crop. */
+  cropShare?: number
   classes: CropYearClass[]
+}
+
+/** The crop the rotation pattern points to this year. An estimate, not an observation. */
+export type ExpectedCrop = {
+  year: number
+  group: string
+  crop: string
+  confidence: 'high' | 'medium'
+  reason: string
+}
+
+/** Plain-language reading of a field's crop history, ready to display. */
+export type CropHistorySummary = {
+  yearsOfData: number
+  firstYear: number | null
+  /** The newest mapped year: always last season, never the current year. */
+  lastSeason: { year: number; crop: string; group: string; groupLabel: string } | null
+  pattern: {
+    kind: 'stable' | 'alternating' | 'rotation' | 'changed' | 'mixed'
+    periodYears: number | null
+    groups: string[]
+    text: string
+  } | null
+  expectedThisYear: ExpectedCrop | null
+  flags: { possiblyMerged: boolean; mostlyNotCropland: boolean }
+  notes: string[]
 }
 
 export type FieldHistory = {
@@ -29,6 +61,7 @@ export type FieldHistory = {
   distinctCrops: string[]
   cropYears: number
   unavailableYears: number[]
+  summary?: CropHistorySummary
   note: string
 }
 

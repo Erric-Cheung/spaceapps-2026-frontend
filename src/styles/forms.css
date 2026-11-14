@@ -107,6 +107,20 @@
     color: var(--ink-muted);
 }
 
+.field-history-pattern {
+    margin-top: 2px;
+}
+
+.field-history-flag {
+    margin-top: 4px;
+    color: var(--error);
+}
+
+.field-crop-hint {
+    font-weight: 400;
+    color: var(--ink-muted);
+}
+
 .field-form-container {
     display: flex;
     flex-direction: column;
