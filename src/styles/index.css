@@ -1,6 +1,30 @@
 :root {
     --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
+    /* Palette */
+    --paper: #F0EFEB;
+    --paper-raised: #F7F6F2;
+    --surface: #FFFFFF;
+    --ink: #3E2C1F;
+    --ink-muted: #6B5544;
+    --brand: #58402E;
+    --brand-hover: #6B4F39;
+    --on-brand: #F0EFEB;
+    --error: #A33A2B;
+
+    /* Brand tints and lines */
+    --brand-08: rgba(88, 64, 46, .08);
+    --brand-40: rgba(88, 64, 46, .40);
+    --border: rgba(88, 64, 46, .16);
+    --border-strong: rgba(88, 64, 46, .25);
+    --hairline: rgba(88, 64, 46, .10);
+    --shadow: rgba(88, 64, 46, .28);
+    --shadow-soft: rgba(0, 0, 0, .08);
+
+    /* Accent (focus + selection highlight) */
+    --focus: rgba(212, 160, 23, .55);
+    --highlight: rgba(212, 160, 23, .18);
+
     /* Basic type scale */
     --text-h1: 2rem;
     --text-h2: 1.5rem;
@@ -16,8 +40,8 @@
 }
 
 body {
-    background: #F0EFEB;
-    color: #58402E;
+    background: var(--paper);
+    color: var(--ink);
     font-family: var(--font-sans);
     font-size: var(--text-body);
     -webkit-font-smoothing: antialiased;
@@ -53,7 +77,7 @@ header {
     justify-content: space-between;
     gap: 8px 24px;
     padding: 12px 16px;
-    border-bottom: 1px solid rgba(88, 64, 46, .16);
+    border-bottom: 1px solid var(--border);
 }
 
 .header-brand {
@@ -68,7 +92,7 @@ header h1 {
 
 header small {
     font-style: italic;
-    color: rgba(88, 64, 46, .70);
+    color: var(--ink-muted);
 }
 
 small {
@@ -98,8 +122,8 @@ fieldset {
     padding: 10px 14px;
     border: 0;
     border-radius: 8px;
-    background: #58402E;
-    color: #F0EFEB;
+    background: var(--brand);
+    color: var(--on-brand);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -111,12 +135,12 @@ fieldset {
 }
 
 .location-step .location-geo {
-    color: #fff;
-    border: 1px solid rgba(88, 64, 46, .25);
+    color: var(--surface);
+    border: 1px solid var(--border-strong);
 }
 
 .location-error {
-    color: #A33A2B;
+    color: var(--error);
     font-size: var(--text-small);
 }
 
@@ -132,12 +156,12 @@ fieldset {
 }
 
 .field-panel {
-    flex: 0 0 clamp(320px, 33.333%, 480px);
+    flex: 0 0 clamp(300px, 28%, 420px);
     min-width: 0;
     min-height: 0;
     overflow: auto;
-    border-left: 1px solid rgba(88, 64, 46, .16);
-    background: #F0EFEB;
+    border-left: 1px solid var(--border);
+    background: var(--paper);
 }
 
 .map-panel {
@@ -164,8 +188,8 @@ fieldset {
     padding: 10px 14px;
     border: 0;
     border-radius: 8px;
-    background: #58402E;
-    color: #F0EFEB;
+    background: var(--brand);
+    color: var(--on-brand);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -176,9 +200,86 @@ fieldset {
     cursor: default;
 }
 
+.field-help {
+    font-size: var(--text-small);
+}
+
+.field-help summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.selected-fields {
+    padding: 0 16px 20px;
+}
+
+.selected-fields-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.selected-fields-head h3 {
+    margin-bottom: 0;
+    font-size: var(--text-body);
+    font-weight: 700;
+}
+
+.selected-fields-total {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--brand-08);
+    font-size: var(--text-small);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.selected-fields ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+}
+
+.selected-fields li {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--paper-raised);
+}
+
+.selected-field-name {
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.selected-field-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--text-small);
+}
+
+.selected-field-stats div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.selected-field-stats dt {
+    color: var(--ink-muted);
+}
+
+.selected-field-stats dd {
+    font-weight: 600;
+    text-align: right;
+}
+
 .form-field-header {
     padding: 20px 16px;
-    border-bottom: 1px solid rgba(88, 64, 46, .16);
+    border-bottom: 1px solid var(--border);
 }
 
 .field-data-form {
@@ -213,7 +314,7 @@ fieldset {
 }
 
 .form-close:hover {
-    background: rgba(88, 64, 46, .08);
+    background: var(--brand-08);
 }
 
 .form-header-copy {
@@ -241,7 +342,7 @@ fieldset {
 
 .form-field-header p {
     text-align: left;
-    color: rgba(88, 64, 46, .78);
+    color: var(--ink-muted);
     line-height: 1.5;
 }
 
@@ -255,7 +356,7 @@ fieldset {
 .form-actions {
     flex-shrink: 0;
     padding: 12px 16px max(12px, env(safe-area-inset-bottom));
-    border-top: 1px solid rgba(88, 64, 46, .16);
+    border-top: 1px solid var(--border);
 }
 
 .form-submit {
@@ -263,16 +364,16 @@ fieldset {
     padding: 12px 18px;
     border: 0;
     border-radius: 999px;
-    background: #58402E;
-    color: #F0EFEB;
+    background: var(--brand);
+    color: var(--on-brand);
     font: inherit;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(88, 64, 46, .28);
+    box-shadow: 0 6px 18px var(--shadow);
 }
 
 .form-submit:hover:not(:disabled) {
-    background: #6B4F39;
+    background: var(--brand-hover);
 }
 
 .form-submit:disabled {
@@ -283,9 +384,9 @@ fieldset {
 
 .field-card {
     padding: 12px 14px 14px;
-    border: 1px solid rgba(88, 64, 46, .16);
+    border: 1px solid var(--border);
     border-radius: 10px;
-    background: #F7F6F2;
+    background: var(--paper-raised);
 }
 
 .field-card legend {
@@ -305,10 +406,10 @@ fieldset {
 .field-card select,
 .field-card input {
     padding: 8px 10px;
-    border: 1px solid rgba(88, 64, 46, .25);
+    border: 1px solid var(--border-strong);
     border-radius: 8px;
-    background: #fff;
-    color: #58402E;
+    background: var(--surface);
+    color: var(--ink);
     font: inherit;
     width: 100%;
     min-width: 0;
@@ -316,7 +417,7 @@ fieldset {
 
 .field-card select:focus,
 .field-card input:focus {
-    outline: 2px solid rgba(212, 160, 23, .55);
+    outline: 2px solid var(--focus);
     outline-offset: 1px;
 }
 
@@ -330,7 +431,7 @@ fieldset {
         flex-basis: 33.333dvh;
         width: 100%;
         border-left: 0;
-        border-top: 1px solid rgba(88, 64, 46, .16);
+        border-top: 1px solid var(--border);
         border-radius: 16px 16px 0 0;
     }
 

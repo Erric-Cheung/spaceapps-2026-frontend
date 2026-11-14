@@ -1,15 +1,15 @@
 .address-search {
   position: relative;
   font: 16px/1.4 var(--font-sans); /* 16px stops iOS zooming in on focus */
-  color: #58402E;
+  color: var(--ink);
 }
 
 .address-search-row {
   display: flex;
-  border: 1px solid rgba(88, 64, 46, .25);
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+  background: var(--surface);
+  box-shadow: 0 1px 4px var(--shadow-soft);
 }
 
 .address-search input {
@@ -24,14 +24,14 @@
   font: inherit;
 }
 
-.address-search input:focus { outline: 2px solid rgba(212, 160, 23, .55); outline-offset: 1px; }
+.address-search input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
 
 .address-search button {
   padding: 0 14px;
   border: 0;
   border-radius: 0 7px 7px 0;
-  background: #58402E;
-  color: #F0EFEB;
+  background: var(--brand);
+  color: var(--on-brand);
   font: 700 15px var(--font-sans);
   cursor: pointer;
 }
@@ -43,10 +43,10 @@
   right: 0;
   z-index: 5;
   margin-top: 4px;
-  border: 1px solid rgba(88, 64, 46, .16);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #F7F6F2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+  background: var(--paper-raised);
+  box-shadow: 0 2px 8px var(--shadow-soft);
   overflow: hidden;
 }
 
@@ -60,9 +60,9 @@
   cursor: pointer;
 }
 
-.address-search-results li + li { border-top: 1px solid rgba(88, 64, 46, .1); }
-.address-search-results li[aria-selected="true"] { background: rgba(212, 160, 23, .18); }
-.address-search-results li span { font-size: var(--text-small); color: rgba(88, 64, 46, .72); }
+.address-search-results li + li { border-top: 1px solid var(--hairline); }
+.address-search-results li[aria-selected="true"] { background: var(--highlight); }
+.address-search-results li span { font-size: var(--text-small); color: var(--ink-muted); }
 
 .sr-only {
   position: absolute;

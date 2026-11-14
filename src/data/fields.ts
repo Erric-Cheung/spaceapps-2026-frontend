@@ -1,6 +1,20 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson'
 
-export type FieldProperties = { id: string; score?: number }
+export type FieldProperties = {
+  id: string
+  score?: number
+  areaAcres?: number
+  areaHa?: number
+  centroid?: [number, number]
+  compactness?: number
+  holes?: number
+  lengthM?: number
+  orientationDeg?: number
+  parts?: number
+  perimeterM?: number
+  sourceYear?: number
+  widthM?: number
+}
 export type FieldFeature = Feature<Polygon | MultiPolygon, FieldProperties>
 
 /** west, south, east, north */

@@ -2,8 +2,11 @@ import { useState } from "react";
 import Map from "./components/Map.tsx";
 import FieldDataForm from "./components/FieldDataForm.tsx";
 import LocationStep from "./components/LocationStep.tsx";
+import SelectedFields from "./components/SelectedFields.tsx";
+import FieldSelectionPanel from "./components/FieldSelectionPanel.tsx";
 import type { FieldFeature } from "./data/fields";
 import type { GeoLocation } from "./data/geocode";
+import { fetchCropHistory } from "./data/cropHistory";
 
 type Stage = "location" | "fields" | "form";
 
@@ -11,6 +14,8 @@ function App() {
   const [stage, setStage] = useState<Stage>("location");
   const [location, setLocation] = useState<GeoLocation | null>(null);
   const [selectedFields, setSelectedFields] = useState<FieldFeature[]>([]);
+  const [predicting, setPredicting] = useState(false);
+  const [predictError, setPredictError] = useState<string | null>(null);
 
   const onLocated = (next: GeoLocation) => {
     setLocation(next);
@@ -19,6 +24,20 @@ function App() {
   };
 
   const count = selectedFields.length;
+
+  const getPredictions = async () => {
+    if (count === 0) return;
+    setPredicting(true);
+    setPredictError(null);
+    try {
+      await fetchCropHistory(selectedFields.map(field => field.properties.id));
+      setStage("form");
+    } catch {
+      setPredictError("Could not load field history. Please try again.");
+    } finally {
+      setPredicting(false);
+    }
+  };
 
   return (
     <>
@@ -38,24 +57,19 @@ function App() {
             onChange={setSelectedFields}
           />
           <aside className={`field-panel${stage === "form" ? " field-panel-details" : ""}`} aria-label={stage === "form" ? "Field details" : "Field selection"}>
-            {stage === "fields" ? <div className="map-panel">
-              <h3>Select your fields</h3>
-              <ol>
-                <li>Drag the map to move around.</li>
-                <li>Click a field to select it.</li>
-                <li>Shift-drag to select several fields at once.</li>
-                <li>When you have all your fields, click Continue.</li>
-              </ol>
-              <button
-                type="button"
-                disabled={count === 0}
-                onClick={() => setStage("form")}
-              >
-                {count === 0
-                  ? "Select at least one field"
-                  : `Continue with ${count} field${count === 1 ? "" : "s"}`}
-              </button>
-            </div> : <FieldDataForm fields={selectedFields} onClose={() => setStage("fields")} />}
+            {stage === "fields" ? (
+              <>
+                <FieldSelectionPanel
+                  count={count}
+                  predicting={predicting}
+                  error={predictError}
+                  onPredict={getPredictions}
+                />
+                <SelectedFields fields={selectedFields} />
+              </>
+            ) : (
+              <FieldDataForm fields={selectedFields} onClose={() => setStage("fields")} />
+            )}
           </aside>
         </main>
       )}

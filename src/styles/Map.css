@@ -36,10 +36,10 @@
   gap: 12px;
   min-height: 44px;
   padding: 6px 14px;
-  border: 1px solid color-mix(in srgb, #58402E 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, transparent);
   border-radius: 8px;
-  background: #F0EFEB;
-  color: #58402E;
+  background: var(--paper);
+  color: var(--ink);
   font: 700 15px/1.4 var(--font-sans);
   z-index: 3;
 }
@@ -50,8 +50,8 @@
   padding: 0 14px;
   border: 0;
   border-radius: 6px;
-  background: #58402E;
-  color: #F0EFEB;
+  background: var(--brand);
+  color: var(--on-brand);
   font: inherit;
   cursor: pointer;
 }
@@ -67,8 +67,8 @@
 .address-pin {
   width: 18px;
   height: 18px;
-  border: 3px solid #F0EFEB;
+  border: 3px solid var(--paper);
   border-radius: 50%;
-  background: #58402E;
-  box-shadow: 0 0 0 1px rgba(88, 64, 46, .4);
+  background: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand-40);
 }
