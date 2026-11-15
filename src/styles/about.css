@@ -1,0 +1,63 @@
+.app-view { display: contents; }
+.app-view--hidden { display: none; }
+
+.about-step {
+    flex: 1;
+    width: min(100% - 48px, 760px);
+    margin: clamp(32px, 7vh, 72px) auto 40px;
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    color: var(--ink-muted);
+}
+
+.about-step h2 {
+    padding: 0;
+    line-height: 1.25;
+    letter-spacing: -.025em;
+    color: var(--ink);
+}
+
+.about-step > p + p { margin-top: 12px; }
+
+.about-intro {
+    max-width: 620px;
+    margin-top: 12px;
+    color: var(--ink);
+}
+
+.about-section {
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+}
+
+.about-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--brand-green);
+    margin-bottom: 10px;
+}
+
+.about-details {
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+}
+
+.about-details summary {
+    min-height: 44px;
+    padding-block: 10px;
+    color: var(--brand-green);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.about-details summary svg { vertical-align: -0.2em; margin-right: 6px; }
+
+.about-details-body p + p { margin-top: 10px; }
+.about-link { color: var(--brand-green); font-weight: 600; text-underline-offset: 3px; }
+
+@media (max-width: 650px) {
+    .about-step { width: min(100% - 40px, 760px); }
+}
