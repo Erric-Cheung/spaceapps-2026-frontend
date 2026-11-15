@@ -56,13 +56,13 @@ function LocationStep({ onLocated }: Props) {
         buttonLabel='Find fields'
         onPick={place => onLocated(toLocation(place))}
       />
-      <button type='button' className='location-geo' onClick={useMyLocation} disabled={busy}>
+      <button type='button' className='button-secondary location-geo' onClick={useMyLocation} disabled={busy}>
         {busy ? 'Finding your location...' : 'Use my current location'}
       </button>
       {error && <p className='location-error' role='alert'>{error}</p>}
 
       <div className='location-example'>
-        <button type='button' onClick={() => onLocated(EXAMPLE_LOCATION)}>Explore example fields</button>
+        <button type='button' className='button-secondary' onClick={() => onLocated(EXAMPLE_LOCATION)}>Explore example fields</button>
         <p>Try the map near Orillia, Ontario, without entering a location.</p>
       </div>
 

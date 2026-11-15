@@ -33,7 +33,7 @@ function FieldSelectionPanel({ fields, highlightedId, onContinue, onLocate, onRe
         {count > 0 && <span>{knownAreas.length === 0 ? 'Area unavailable' : `About ${totalAcres.toLocaleString(undefined, { maximumFractionDigits: 1 })} acres${knownAreas.length < count ? ' (known areas)' : ' in total'}`}</span>}
       </div>
 
-      <button type='button' className='selection-list-toggle' aria-expanded={expanded} aria-controls='selection-details' onClick={() => setExpanded(value => !value)}>
+      <button type='button' className='button-secondary selection-list-toggle' aria-expanded={expanded} aria-controls='selection-details' onClick={() => setExpanded(value => !value)}>
         {expanded ? 'Hide field list' : 'Show field list'}
       </button>
 

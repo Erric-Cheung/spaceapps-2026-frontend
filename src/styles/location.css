@@ -58,35 +58,23 @@
 .location-step .address-search-results li { padding: 12px 14px; }
 .location-step .address-search-results li span { font-size: .88em; }
 
-.location-geo {
-    min-height: 48px;
-    margin-top: 14px;
-    padding: 10px 16px;
-    border: 1px solid var(--border-strong);
-    border-radius: 6px;
-    background: transparent;
-    color: var(--ink);
-    font: inherit;
-    cursor: pointer;
-}
-.location-geo:hover { background: var(--brand-08); }
-.location-geo:disabled { cursor: wait; opacity: .65; }
+.location-geo { margin-top: 14px; }
+.location-geo:disabled { cursor: wait; }
 .location-error { margin-top: 12px; color: var(--error); }
 
-.location-example { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--border); }
-.location-example button {
-    min-height: 44px;
-    padding: 4px 0;
-    border: 0;
-    background: transparent;
-    color: var(--ink);
-    font: inherit;
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    cursor: pointer;
+.location-example { position: relative; margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--border); }
+.location-example::before {
+    content: 'or';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 0 12px;
+    background: var(--paper);
+    color: var(--ink-muted);
+    font-size: .88em;
 }
-.location-example p { margin-top: 3px; color: var(--ink-muted); font-size: .94em; }
+.location-example p { margin-top: 10px; color: var(--ink-muted); font-size: .94em; }
 
 .location-step button:focus-visible {
     outline: 3px solid var(--brand);

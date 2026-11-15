@@ -29,7 +29,7 @@ function SelectedFields({ fields, highlightedId, onLocate, onRemove, onHighlight
                 <span>{p.areaAcres == null ? 'Area unavailable' : `About ${p.areaAcres.toLocaleString(undefined, { maximumFractionDigits: 1 })} acres`}</span>
               </span>
             </button>
-            <button className='selected-field-remove' type='button' onClick={() => onRemove(p.id)} aria-label={`Remove Field ${number}`}>Remove</button>
+            <button className='button-secondary selected-field-remove' type='button' onClick={() => onRemove(p.id)} aria-label={`Remove Field ${number}`}>Remove</button>
           </li>
         )
       })}

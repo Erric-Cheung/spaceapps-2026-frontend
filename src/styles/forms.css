@@ -1,7 +1,7 @@
 .field-review-form { display: flex; flex-direction: column; height: 100%; min-height: 0; font-size: 17px; line-height: 1.5; }
 .review-heading { padding: 16px 32px 22px; border-bottom: 1px solid var(--border); }
 .review-topline { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 18px; }
-.review-back, .review-text-button { min-height: 44px; border: 0; padding: 4px 0; background: transparent; color: var(--ink-muted); font: inherit; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.review-text-button { align-self: flex-start; margin-top: 12px; }
 .review-steps { display: flex; gap: 22px; list-style: none; color: var(--ink-muted); font-size: 14px; }
 .review-steps [aria-current='step'] { color: var(--ink); font-weight: 800; text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
 .review-title-row { display: flex; justify-content: space-between; align-items: center; gap: 32px; }
@@ -59,8 +59,7 @@
 .review-answer { border-left: 1px solid var(--border); padding-left: clamp(24px, 3.5vw, 64px); }
 .review-suggestion { margin-bottom: 20px; }
 .review-suggestion-reason { font-size: 14px; color: var(--ink-muted); margin-top: 6px; }
-.review-use-crop { margin-top: 12px; min-height: 44px; padding: 8px 16px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--paper-raised); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
-.review-use-crop:hover { background: var(--brand-08); }
+.review-use-crop { margin-top: 12px; }
 .review-answer label { display: block; font-size: 15px; font-weight: 600; margin: 22px 0 8px; }
 .review-answer label span { color: var(--ink-muted); font-weight: 400; }
 .review-answer select, .review-answer input { display: block; width: 100%; min-width: 0; min-height: 48px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--ink); font: inherit; }
@@ -69,9 +68,7 @@
 
 .review-actions { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 32px max(16px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); }
 .review-paging { display: flex; align-items: center; gap: 16px; }
-.review-paging button { min-height: 44px; padding: 8px 12px; border: 0; background: none; color: var(--ink); font: inherit; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
 .review-paging > span { color: var(--ink-muted); font-size: 14px; font-variant-numeric: tabular-nums; }
-.review-paging button:disabled { opacity: .45; cursor: default; }
 .review-confirm-action { display: flex; align-items: center; gap: 24px; }
 .review-all-confirmed { font-size: 15px; color: var(--ink); }
 .review-primary { min-height: 50px; padding: 12px 24px; border: 0; border-radius: 6px; background: var(--brand); color: var(--on-brand); font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }

@@ -1,0 +1,21 @@
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button-secondary:hover:enabled { background: var(--brand-08); }
+.button-secondary:disabled { opacity: .55; cursor: default; }
+.button-secondary:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
