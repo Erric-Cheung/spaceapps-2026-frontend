@@ -40,6 +40,13 @@ function App() {
     mapRef.current?.highlightField(id);
   };
 
+  const removeField = (id: string) => {
+    setSelectedFields(previous => previous
+      .filter(field => field.properties.id !== id)
+      .map((field, index) => ({ ...field, properties: { ...field.properties, selectionNumber: index + 1 } })));
+    mapRef.current?.removeField(id);
+  };
+
   const handleLocationSelected = (next: GeoLocation) => {
     setLocation(next);
     setSelectedFields([]);
@@ -103,7 +110,7 @@ function App() {
                 highlightedId={highlightedId}
                 onContinue={() => { highlightField(null); setStep("form"); }}
                 onLocate={field => mapRef.current?.focusField(field)}
-                onRemove={id => mapRef.current?.removeField(id)}
+                onRemove={removeField}
                 onHighlight={highlightField}
                 onBack={startOver}
               />
