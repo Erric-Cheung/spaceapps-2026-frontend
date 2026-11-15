@@ -1,0 +1,188 @@
+.imagery {
+  max-width: 1000px;
+  margin: 24px auto;
+  padding: 24px;
+  background: #f0efeb;
+  color: #58402e;
+  border-radius: 18px;
+  font-family: "Manrope", system-ui, sans-serif;
+}
+.imagery-heading,
+.imagery-details,
+.imagery-controls,
+.imagery-range,
+.imagery-track label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.imagery-title {
+  margin: 0 0 18px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.imagery-eyebrow {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+}
+.imagery-badge {
+  border: 1px solid #c1c8a9;
+  background: #e4e7d8;
+  padding: 8px 12px;
+  border-radius: 24px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.imagery-description,
+.imagery-note {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #796b60;
+}
+.imagery-map {
+  position: relative;
+  border: 1px solid #c6beb3;
+  height: clamp(300px, 50vh, 520px);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e6e6dc;
+}
+.imagery-map-canvas,
+.imagery-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.imagery-overlay {
+  pointer-events: none;
+}
+.imagery-map-label {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  max-width: calc(100% - 80px);
+  border-radius: 6px;
+  background: #f0efebed;
+  padding: 8px 12px;
+  font-size: 12px;
+  pointer-events: none;
+}
+.imagery-image-status,
+.imagery-map-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #f0efebed;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+}
+.imagery-image-status button {
+  display: block;
+  margin: 8px auto 0;
+}
+.imagery-details {
+  padding: 20px 0;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.imagery-details strong {
+  display: block;
+  font-size: 21px;
+  margin-bottom: 5px;
+}
+.imagery-details span {
+  color: #796b60;
+}
+.imagery-controls {
+  border-top: 1px solid #d8d2c8;
+  padding-top: 20px;
+}
+.imagery-controls > button,
+.imagery-image-status button {
+  border: 1px solid #c6beb3;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #faf9f6;
+  color: #58402e;
+  cursor: pointer;
+}
+.imagery-controls > button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.imagery-controls > button:focus-visible,
+.imagery-image-status button:focus-visible,
+.imagery input:focus-visible {
+  outline: 3px solid #9a7420;
+  outline-offset: 3px;
+}
+.imagery-track {
+  flex: 1;
+  min-width: 0;
+}
+.imagery-track label {
+  font-size: 12px;
+}
+.imagery-track input {
+  display: block;
+  width: 100%;
+  margin: 14px 0;
+  accent-color: #8a6717;
+  cursor: pointer;
+}
+.imagery-range {
+  font-size: 11px;
+}
+.imagery-note {
+  margin-bottom: 0;
+  font-size: 11px;
+}
+.imagery-demo-link {
+  color: inherit;
+  margin-left: auto;
+  font-size: 13px;
+}
+.review-evidence .imagery {
+  margin: 16px 0 0;
+  padding: 0;
+  max-width: none;
+}
+.review-evidence .imagery-heading {
+  flex-wrap: wrap;
+}
+.review-evidence .imagery-map {
+  height: 300px;
+}
+@media (max-width: 600px) {
+  .imagery {
+    margin: 12px;
+    padding: 16px;
+  }
+  .imagery-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .imagery-controls {
+    gap: 10px;
+  }
+}
+
+/* Keep form/timeline button styling away from MapLibre's icon buttons. */
+.imagery-map .maplibregl-ctrl-group button {
+  width: 36px;
+  height: 36px;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+.imagery-map .maplibregl-ctrl-group button:focus-visible {
+  outline: 2px solid #9a7420;
+  outline-offset: -3px;
+}

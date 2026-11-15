@@ -1,10 +1,12 @@
-import { useState, type FormEvent } from 'react'
+import { lazy, Suspense, useState, type FormEvent } from 'react'
 import type { FieldFeature } from '../data/fields'
 import type { CropHistoryResponse } from '../data/cropHistory'
 import { crops } from '../data/crops'
 import type { HistoryEntry } from '../data/cropHistoryCache'
 import { canConfirm, cropAnswer, EMPTY_REVIEW, OTHER_CROP, NO_CROP, UNKNOWN_CROP, type FieldReviewInput } from '../data/fieldReview'
 import FieldOutline from './FieldOutline'
+
+const FieldImagerySlider = lazy(() => import('./FieldImagerySlider'))
 
 type Props = {
   fields: FieldFeature[]
@@ -121,6 +123,9 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
                 <p>{fieldHistory.note}</p>
                 {fieldHistory.summary?.notes.map(note => <p key={note}>{note}</p>)}
               </details>}
+              <Suspense fallback={<p role='status'>Loading satellite imagery...</p>}>
+                <FieldImagerySlider boundary={field.geometry} fieldName={`Field ${number}`} showImagery sampleImagery />
+              </Suspense>
             </div>
 
             <div className='review-answer'>
