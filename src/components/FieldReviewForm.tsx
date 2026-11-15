@@ -139,14 +139,14 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
                 {suggestion?.confidence && <p className='review-suggestion-reason'>Pattern support: {suggestion.confidence}.</p>}
               </div>}
               {suggestion?.status === 'unavailable' && <p className='review-no-history'>{suggestion.reason}</p>}
-              <label htmlFor='review-crop'>{suggestedCrop ? 'Crop' : 'What grew here in the latest season?'}</label>
-              <select id='review-crop' value={input.crop} onChange={event => update({ crop: event.target.value })}>
+              <label htmlFor='review-crop'>{suggestedCrop ? 'Crop' : 'What grew here in the latest season?'} <span className='required-mark' aria-hidden='true'>*</span></label>
+              <select id='review-crop' required value={input.crop} onChange={event => update({ crop: event.target.value })}>
                 {!suggestedCrop && <option value=''>Choose a crop</option>}
                 {options.map(crop => <option key={crop} value={crop}>{crop}</option>)}
                 <option value={OTHER_CROP}>Other crop</option><option value={NO_CROP}>Nothing planted</option><option value={UNKNOWN_CROP}>I’m not sure</option>
               </select>
-              {input.crop === OTHER_CROP && <><label htmlFor='review-other-crop'>Crop name</label><input id='review-other-crop' value={input.otherCrop} onChange={event => update({ otherCrop: event.target.value })} placeholder='Enter the crop you grew' /></>}
-              <label htmlFor='review-ready-date'>Next planting date</label>
+              {input.crop === OTHER_CROP && <><label htmlFor='review-other-crop'>Crop name <span className='required-mark' aria-hidden='true'>*</span></label><input id='review-other-crop' required value={input.otherCrop} onChange={event => update({ otherCrop: event.target.value })} placeholder='Enter the crop you grew' /></>}
+              <label htmlFor='review-ready-date'>Next planting date <span className='required-mark' aria-hidden='true'>*</span></label>
               <input id='review-ready-date' type='date' required value={input.readyDate} onChange={event => update({ readyDate: event.target.value })} />
               <p className='review-input-hint'>When will this field be available to plant again? We use this date to predict the next crop rotation.</p>
               {input.confirmed && <p className='review-confirmed-message' role='status'>Confirmed: {cropAnswer(input)}. You can still change your answer.</p>}

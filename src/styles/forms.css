@@ -58,6 +58,7 @@
 .review-suggestion-reason { font-size: 0.875rem; color: var(--ink-muted); margin-top: 6px; }
 .review-answer label { display: block; font-size: 0.9375rem; font-weight: 600; margin: 22px 0 8px; }
 .review-answer label span { color: var(--ink-muted); font-weight: 400; }
+.review-answer label .required-mark { color: var(--error); font-weight: 700; }
 .review-answer select, .review-answer input { display: block; width: 100%; min-width: 0; min-height: 48px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--ink); font: inherit; }
 .review-input-hint { font-size: 0.875rem; color: var(--ink-muted); margin-top: 9px; line-height: 1.6; }
 .review-confirmed-message { margin-top: 22px; padding-left: 12px; border-left: 3px solid var(--brand); font-size: 0.9375rem; }
