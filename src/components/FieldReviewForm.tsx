@@ -2,10 +2,14 @@ import { useState, type FormEvent } from 'react'
 import type { FieldFeature } from '../data/fields'
 import type { CropHistoryResult, CropHistoryResponse, FieldHistory } from '../data/cropHistory'
 import { crops } from '../data/crops'
+import FieldOutline from './FieldOutline'
 
 type Props = {
   fields: FieldFeature[]
   history: CropHistoryResponse | null
+  loadingHistory: number
+  failedHistory: number
+  onRetryHistory: () => void
   onClose: () => void
   onSubmit?: (fieldInputs: { fieldId: string; crop: string; readyDate: string }[]) => void
 }
@@ -15,46 +19,19 @@ type FieldInput = { crop: string; readyDate: string }
 const BLANK_FIELD_INPUT: FieldInput = { crop: '', readyDate: '' }
 const isComplete = (input: FieldInput) => input.crop !== '' && input.readyDate !== ''
 
-/**
- * This year's crop to pre-fill: the rotation estimate, when it is one of our dropdown
- * options. The newest crop map is always last season, so it is never used as the
- * current crop; without a clear estimate the farmer chooses.
- */
-function prefilledCrop(history?: FieldHistory): string {
-  const expected = history?.summary?.expectedThisYear
-  if (!expected) return ''
-  return crops.find(crop => crop.toLowerCase() === expected.crop.toLowerCase()) ?? ''
-}
-
-function buildInitialInputs(
-  fields: FieldFeature[],
-  history: CropHistoryResponse | null,
-): Record<string, FieldInput> {
-  const resultsById = new Map<string, CropHistoryResult>(
-    (history?.results ?? []).map(result => [result.id, result]),
-  )
-  const inputs: Record<string, FieldInput> = {}
-  for (const field of fields) {
-    const fieldHistory = resultsById.get(field.properties.id)?.history
-    inputs[field.properties.id] = { crop: prefilledCrop(fieldHistory), readyDate: '' }
-  }
-  return inputs
-}
-
 /** The most recent years of crop history, newest first. */
 function recentYears(history: FieldHistory, count = 5) {
   return [...history.years].sort((a, b) => b.year - a.year).slice(0, count)
 }
 
-function FieldReviewForm({ fields, history, onClose, onSubmit }: Props) {
+function FieldReviewForm({ fields, history, loadingHistory, failedHistory, onRetryHistory, onClose, onSubmit }: Props) {
   const [fieldInputs, setFieldInputs] = useState<Record<string, FieldInput>>(
-    () => buildInitialInputs(fields, history),
+    () => Object.fromEntries(fields.map(field => [field.properties.id, { ...BLANK_FIELD_INPUT }])),
   )
 
   const resultsById = new Map<string, CropHistoryResult>(
     (history?.results ?? []).map(result => [result.id, result]),
   )
-  const hasHistory = [...resultsById.values()].some(result => result.history)
   const historyNote = [...resultsById.values()].find(result => result.history?.note)?.history?.note
   // "The newest crop map is 2025 (last season)…": the same for every field, so shown once.
   const mapNote = [...resultsById.values()].find(result => result.history?.summary?.notes.length)?.history?.summary?.notes[0]
@@ -95,11 +72,10 @@ function FieldReviewForm({ fields, history, onClose, onSubmit }: Props) {
               </button>
             </div>
             <p>
-              {hasHistory
-                ? "We read satellite crop maps for each field. Where the crops follow a clear rotation, we filled in this year's likely crop. Please check it, and add the date each field will be ready to plant something new."
-                : 'Choose the crop currently growing in each field and the date it will be ready to plant something new.'}{' '}
-              All fields are required.
+              Choose the crop currently growing in each field and the date it will be ready to plant something new. Crop maps are estimates for you to check. All fields are required.
             </p>
+            {loadingHistory > 0 && <p role='status'>Loading crop history for {loadingHistory} field{loadingHistory === 1 ? '' : 's'}. You can enter crops now.</p>}
+            {failedHistory > 0 && <p role='status'>History is unavailable for {failedHistory} field{failedHistory === 1 ? '' : 's'}. You can still enter crops. <button type='button' className='history-retry' onClick={onRetryHistory}>Retry history</button></p>}
             {(mapNote || historyNote) && (
               <p className='form-history-note'>{[mapNote, historyNote].filter(Boolean).join(' ')}</p>
             )}
@@ -114,10 +90,10 @@ function FieldReviewForm({ fields, history, onClose, onSubmit }: Props) {
             const summary = fieldHistory?.summary
             const expected = summary?.expectedThisYear
             const lastYear = summary?.lastSeason?.year
-            const usedEstimate = Boolean(expected) && input.crop !== '' && input.crop === prefilledCrop(fieldHistory)
             return (
               <fieldset key={id} className='field-card'>
-                <legend>Field {index + 1}</legend>
+                <legend>Field {field.properties.selectionNumber ?? index + 1}</legend>
+                <div className='review-field-identity'><FieldOutline field={field} /><span>{field.properties.areaAcres == null ? 'Area unavailable' : `About ${field.properties.areaAcres.toLocaleString(undefined, { maximumFractionDigits: 1 })} acres`}</span></div>
 
                 {fieldHistory && (
                   <div className='field-history'>
@@ -161,13 +137,9 @@ function FieldReviewForm({ fields, history, onClose, onSubmit }: Props) {
                   </select>
                   {summary && (
                     <span className='field-crop-hint'>
-                      {usedEstimate && expected
-                        ? `Estimated from the rotation (${expected.confidence} confidence). Change it if this year is different.`
-                        : expected && !prefilledCrop(fieldHistory)
-                          ? `The rotation points to ${expected.crop.toLowerCase()} this year, which isn't in this list. Please choose the closest crop.`
-                          : expected
-                            ? `The rotation points to ${expected.crop.toLowerCase()} this year.`
-                            : "We couldn't estimate this year's crop, so please choose it."}
+                      {expected
+                        ? `The rotation suggests ${expected.crop.toLowerCase()} for ${expected.year} (${expected.confidence} confidence). Please confirm what actually grows here.`
+                        : "We couldn't estimate this year's crop, so please choose it."}
                     </span>
                   )}
                 </label>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { useEffect, useImperativeHandle, useRef, useState, type ReactNode, type Ref, type RefObject } from 'react'
 import maplibregl, { type ExpressionSpecification, type GeoJSONSource } from 'maplibre-gl'
 import type { FeatureCollection, Point } from 'geojson'
 import AddressSearch from './AddressSearch'
@@ -23,7 +23,7 @@ const START = { center: [-79.52, 44.58] as [number, number], zoom: 12 } // just 
 const LAYER = { fill: 'field-fill', line: 'field-line', hover: 'field-hover', halo: 'field-selected-halo', sel: 'field-selected', num: 'field-num', numText: 'field-num-text' }
 
 const sel: ExpressionSpecification = ['boolean', ['feature-state', 'selected'], false]
-const hov: ExpressionSpecification = ['boolean', ['feature-state', 'hover'], false]
+const hov: ExpressionSpecification = ['any', ['boolean', ['feature-state', 'hover'], false], ['boolean', ['feature-state', 'inspect'], false]]
 const contains = (outer: BBox, inner: BBox) => outer[0] <= inner[0] && outer[1] <= inner[1] && outer[2] >= inner[2] && outer[3] >= inner[3]
 
 // Addresses get a pin at street level; towns and roads are framed by their extent.
@@ -44,28 +44,45 @@ function showPlace(map: maplibregl.Map, place: Place, pinRef: RefObject<maplibre
   }
 }
 
+/** Selection controls shared with the field list. */
+export type FieldMapHandle = {
+  removeField: (id: string) => void
+  focusField: (field: FieldFeature) => void
+  highlightField: (id: string | null) => void
+}
+
 type Props = {
+  ref?: Ref<FieldMapHandle>
+  onHoverField?: (id: string | null) => void
   onChange?: (fields: FieldFeature[]) => void
   location?: GeoLocation
   children?: ReactNode
 }
 type Status = 'idle' | 'zoom' | 'loading' | 'error'
 
-export default function Map({ onChange, location, children }: Props) {
+export default function Map({ ref: controlRef, onChange, onHoverField, location, children }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const onChangeRef = useRef(onChange)
+  const onHoverRef = useRef(onHoverField)
+  const controls = useRef<FieldMapHandle>({ removeField: () => {}, focusField: () => {}, highlightField: () => {} })
+  useImperativeHandle(controlRef, () => ({
+    removeField: id => controls.current.removeField(id),
+    focusField: field => controls.current.focusField(field),
+    highlightField: id => controls.current.highlightField(id),
+  }), [])
   const retryRef = useRef(() => {})
   const mapRef = useRef<maplibregl.Map | null>(null)
   const pinRef = useRef<maplibregl.Marker | null>(null)
   const [status, setStatus] = useState<Status>('loading')
 
-  useEffect(() => { onChangeRef.current = onChange })
+  useEffect(() => { onChangeRef.current = onChange; onHoverRef.current = onHoverField })
 
   useEffect(() => {
     const container = ref.current!
     const selected = new globalThis.Map<string, FieldFeature>()
     const byId = new globalThis.Map<string, FieldFeature>()
     const loaded: BBox[] = []
+    let inspectedId: string | null = null
     let request: AbortController | undefined
     let hoverId: string | null = null
     let reveal: ReturnType<typeof createFieldReveal> | undefined
@@ -100,23 +117,49 @@ export default function Map({ onChange, location, children }: Props) {
     }
     const numberPoints = (): FeatureCollection<Point> => ({
       type: 'FeatureCollection',
-      features: [...selected.values()].map((f, i) => ({
-        type: 'Feature', properties: { n: i + 1, id: f.properties.id }, geometry: { type: 'Point', coordinates: labelPoint(f.geometry) },
+      features: [...selected.values()].map(f => ({
+        type: 'Feature', properties: { n: f.properties.selectionNumber, id: f.properties.id }, geometry: { type: 'Point', coordinates: labelPoint(f.geometry) },
       })),
     })
     const emitChange = () => {
+      let number = 1
+      for (const [id, field] of selected) {
+        selected.set(id, { ...field, properties: { ...field.properties, selectionNumber: number++ } })
+      }
       (map.getSource(NUMBERS) as GeoJSONSource | undefined)?.setData(numberPoints())
       onChangeRef.current?.([...selected.values()])
     }
     const select = (id: string) => {
       const f = byId.get(id)
-      if (!f) return
-      selected.set(id, f)
+      if (!f || selected.has(id)) return
+      selected.set(id, { ...f, properties: { ...f.properties, selectionNumber: selected.size + 1 } })
       state(id, { selected: true })
     }
     const toggle = (id: string) => {
       if (selected.has(id)) { selected.delete(id); state(id, { selected: false }) } else select(id)
       emitChange()
+    }
+
+    controls.current = {
+      removeField: id => {
+        if (!selected.has(id)) return
+        selected.delete(id)
+        state(id, { selected: false, inspect: false })
+        emitChange()
+        onHoverRef.current?.(null)
+      },
+      focusField: field => {
+        const polygons = field.geometry.type === 'Polygon' ? [field.geometry.coordinates] : field.geometry.coordinates
+        const bounds = new maplibregl.LngLatBounds()
+        for (const polygon of polygons) for (const ring of polygon) for (const point of ring) bounds.extend([point[0], point[1]])
+        const small = container.clientWidth < 600
+        map.fitBounds(bounds, { padding: { top: 90, bottom: 55, left: small ? 35 : 65, right: small ? 35 : 65 }, maxZoom: 16, duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500 })
+      },
+      highlightField: id => {
+        if (inspectedId) state(inspectedId, { inspect: false })
+        inspectedId = id
+        if (id) state(id, { inspect: true })
+      },
     }
 
     function addLayers() {
@@ -142,7 +185,7 @@ export default function Map({ onChange, location, children }: Props) {
           'line-color': t.paper, 'line-width': 4, 'line-opacity': ['case', sel, 0.95, 0],
         } })
         map.addLayer({ id: ids.sel, type: 'line', ...s, paint: {
-          'line-color': t.ink, 'line-width': 2, 'line-opacity': ['case', sel, 1, 0],
+          'line-color': t.ink, 'line-width': ['case', hov, 4, 2], 'line-opacity': ['case', sel, 1, 0],
         } })
       }
       addFieldLayers(FIELDS, LAYER)
@@ -202,12 +245,14 @@ export default function Map({ onChange, location, children }: Props) {
       if (id === hoverId) return
       if (hoverId) state(hoverId, { hover: false })
       hoverId = id
+      onHoverRef.current?.(id)
       if (id) state(id, { hover: true })
       map.getCanvas().style.cursor = id ? 'pointer' : ''
     })
     map.on('mouseout', () => {
       if (hoverId) state(hoverId, { hover: false })
       hoverId = null
+      onHoverRef.current?.(null)
     })
 
     // Shift-drag: select every field inside the box.
@@ -250,6 +295,7 @@ export default function Map({ onChange, location, children }: Props) {
       resolveLayers()
       reveal?.destroy()
       retryRef.current = () => {}
+      controls.current = { removeField: () => {}, focusField: () => {}, highlightField: () => {} }
       canvas.removeEventListener('mousedown', onMouseDown)
       resizeObserver.disconnect()
       mapRef.current = null

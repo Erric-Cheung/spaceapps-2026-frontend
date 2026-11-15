@@ -1,11 +1,12 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import FieldReviewForm from "./components/FieldReviewForm.tsx";
 import LocationStep from "./components/LocationStep.tsx";
-import SelectedFields from "./components/SelectedFields.tsx";
 import FieldSelectionPanel from "./components/FieldSelectionPanel.tsx";
 import type { FieldFeature } from "./data/fields";
 import type { GeoLocation } from "./data/geocode";
-import { fetchCropHistory, type CropHistoryResponse } from "./data/cropHistory";
+import type { CropHistoryResponse } from "./data/cropHistory";
+import { useCropHistory } from "./data/cropHistoryCache";
+import type { FieldMapHandle } from "./components/Map";
 
 type Step = "location" | "fields" | "form";
 const Map = lazy(() => import("./components/Map.tsx"));
@@ -14,31 +15,28 @@ function App() {
   const [step, setStep] = useState<Step>("location");
   const [location, setLocation] = useState<GeoLocation | null>(null);
   const [selectedFields, setSelectedFields] = useState<FieldFeature[]>([]);
-  const [isLoadingPredictions, setIsLoadingPredictions] = useState(false);
-  const [predictionsError, setPredictionsError] = useState<string | null>(null);
-  const [cropHistory, setCropHistory] = useState<CropHistoryResponse | null>(null);
+  const mapRef = useRef<FieldMapHandle>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const selectedIds = useMemo(() => selectedFields.map(field => field.properties.id), [selectedFields]);
+  const { entries, retry } = useCropHistory(selectedIds);
+  const loadingHistory = selectedIds.filter(id => entries[id]?.status === 'loading' || !entries[id]).length;
+  const failedHistory = selectedIds.filter(id => entries[id]?.status === 'error').length;
+  const historyResults = selectedIds.flatMap(id => entries[id]?.result ? [entries[id].result!] : []);
+  const cropHistory: CropHistoryResponse = {
+    results: historyResults,
+    requested: selectedIds.length,
+    succeeded: selectedIds.filter(id => entries[id]?.status === 'ready').length,
+    failed: failedHistory,
+  };
+  const highlightField = (id: string | null) => {
+    setHighlightedId(id);
+    mapRef.current?.highlightField(id);
+  };
 
   const handleLocationSelected = (next: GeoLocation) => {
     setLocation(next);
     setSelectedFields([]);
     setStep("fields");
-  };
-
-  const selectedCount = selectedFields.length;
-
-  const requestPredictions = async () => {
-    if (selectedCount === 0) return;
-    setIsLoadingPredictions(true);
-    setPredictionsError(null);
-    try {
-      const history = await fetchCropHistory(selectedFields.map(field => field.properties.id));
-      setCropHistory(history);
-      setStep("form");
-    } catch {
-      setPredictionsError("Could not load field history. Please try again.");
-    } finally {
-      setIsLoadingPredictions(false);
-    }
   };
 
   return (
@@ -55,6 +53,8 @@ function App() {
         <main className={`field-workspace${step === "form" ? " field-workspace--form" : ""}`}>
           <Suspense fallback={<div className="map-loading" role="status">Opening your field map…</div>}>
             <Map
+              ref={mapRef}
+              onHoverField={setHighlightedId}
               key={`${location.lat},${location.lng}`}
               location={location}
               onChange={setSelectedFields}
@@ -62,19 +62,21 @@ function App() {
           </Suspense>
           <aside className="field-panel" aria-label={step === "form" ? "Field details" : "Field selection"}>
             {step === "fields" ? (
-              <>
-                <FieldSelectionPanel
-                  selectedCount={selectedCount}
-                  isLoadingPredictions={isLoadingPredictions}
-                  error={predictionsError}
-                  onPredict={requestPredictions}
-                />
-                <SelectedFields fields={selectedFields} />
-              </>
+              <FieldSelectionPanel
+                fields={selectedFields}
+                highlightedId={highlightedId}
+                onContinue={() => { highlightField(null); setStep("form"); }}
+                onLocate={field => mapRef.current?.focusField(field)}
+                onRemove={id => mapRef.current?.removeField(id)}
+                onHighlight={highlightField}
+              />
             ) : (
               <FieldReviewForm
                 fields={selectedFields}
                 history={cropHistory}
+                loadingHistory={loadingHistory}
+                failedHistory={failedHistory}
+                onRetryHistory={retry}
                 onClose={() => setStep("fields")}
               />
             )}

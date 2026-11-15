@@ -2,6 +2,8 @@ import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson'
 
 export type FieldProperties = {
   id: string
+  /** Current position in the selection, shared by list rows and map labels. */
+  selectionNumber?: number
   score?: number
   areaAcres?: number
   areaHa?: number

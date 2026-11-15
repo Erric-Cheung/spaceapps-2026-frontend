@@ -15,6 +15,30 @@ npm run dev
 The API sends no CORS headers, so the browser calls `/api/*` and Vite forwards it
 to `API_URL`. The map uses `GET /fields?bbox=...`, following `nextCursor`.
 
+## Selecting fields
+
+Selected fields appear with a north-up outline and approximate acreage. Select a
+row to locate its field on the map, or use Remove to deselect it. Field numbers
+follow selection order and close any gaps when a field is removed, in both the
+list and map. On phones, Show field list expands the selection panel.
+
+Crop history starts loading on selection, with at most two requests in flight.
+Results are reused for the session. Continue opens crop confirmation immediately;
+missing or failed history never prevents manual entry, and failed requests can be
+retried. Current crops start blank and arriving history does not replace entries.
+
+Local browser verification at 1440 x 900 and 390 x 844 checked selection, removal,
+field location, and consecutive numbering. With history deliberately delayed, opening
+crop confirmation took 27 ms in one local run; this measures the screen transition,
+not provider latency. A simulated provider failure and successful real-data retry
+preserved the crop and planting date entered while waiting.
+
+Run acquisition queue and navigation checks with:
+
+```sh
+node --test tests/cropHistoryCache.test.ts tests/mapNavigation.test.ts
+```
+
 ## Address search
 
 The search box on the map finds addresses, roads and towns in Canada with
