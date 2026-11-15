@@ -49,3 +49,25 @@
 .results-rationale ol { margin: 12px 0 0; padding-left: 24px; }
 .results-rationale li + li { margin-top: 16px; }
 .results-rationale li p { margin-top: 4px; color: var(--ink-muted); }
+
+.results-note { margin-top: 20px; padding: 14px 16px; border-left: 3px solid var(--focus); background: var(--paper-raised); }
+.results-option-number { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 10px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: .875rem; font-variant-numeric: tabular-nums; vertical-align: 2px; }
+.results-compare-wrap { margin-top: 24px; }
+.results-compare { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.results-compare th, .results-compare td { padding: 12px 12px 12px 0; text-align: left; border-bottom: 1px solid var(--border); vertical-align: baseline; }
+.results-compare thead th { color: var(--ink-muted); font-size: .9375rem; font-weight: 600; }
+.results-compare tbody th { font-weight: 600; }
+.results-best { color: var(--brand-green); font-weight: 700; }
+.results-compare-note { margin-top: 8px; color: var(--ink-muted); font-size: .9375rem; }
+.results-rationale ol ul, .results-assumptions { margin: 6px 0 0; padding-left: 20px; color: var(--ink-muted); }
+.results-rationale ol ul li + li, .results-assumptions li + li { margin-top: 4px; }
+@media (max-width: 650px) {
+    .results-compare thead { display: none; }
+    .results-compare, .results-compare tbody, .results-compare tr, .results-compare th, .results-compare td { display: block; width: 100%; }
+    .results-compare tr { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .results-compare th, .results-compare td { border: 0; padding: 2px 0; }
+    .results-compare td::before { color: var(--ink-muted); }
+    .results-compare td:nth-of-type(1)::before { content: "Soil health: "; }
+    .results-compare td:nth-of-type(2)::before { content: "Climate and soil fit: "; }
+    .results-compare td:nth-of-type(3)::before { content: "Income over 5 years: "; }
+}

@@ -92,6 +92,10 @@ function App() {
           <ResultsStep
             fields={selectedFields}
             answers={submittedFields}
+            mappedCrops={Object.fromEntries(selectedIds.map(id => {
+              const summary = entries[id]?.result?.history?.summary;
+              return [id, summary?.currentCrop?.crop ?? summary?.latestMapped?.groupLabel];
+            }))}
             onBack={() => setStep("form")}
             onStartOver={startOver}
           />
