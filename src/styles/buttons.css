@@ -32,8 +32,8 @@
 }
 
 .button-secondary:hover:enabled {
-  border-color: var(--brand-green-mid);
-  background: var(--brand-green-mid);
+  border-color: var(--brand-green-hover);
+  background: var(--brand-green-hover);
 }
 
 .button-primary:disabled,

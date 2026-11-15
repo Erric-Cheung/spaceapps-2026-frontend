@@ -1,3 +1,5 @@
+.header-about { flex-shrink: 0; }
+
 .step-header {
     display: flex;
     align-items: center;

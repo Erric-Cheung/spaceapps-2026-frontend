@@ -1,4 +1,6 @@
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Info } from "lucide-react";
+import AboutStep from "./components/AboutStep.tsx";
 import FieldReviewForm from "./components/FieldReviewForm.tsx";
 import LocationStep from "./components/LocationStep.tsx";
 import FieldSelectionPanel from "./components/FieldSelectionPanel.tsx";
@@ -16,6 +18,7 @@ const Map = lazy(() => import("./components/Map.tsx"));
 
 function App() {
   const [step, setStep] = useState<Step>("location");
+  const [showAbout, setShowAbout] = useState(false);
   const [location, setLocation] = useState<GeoLocation | null>(null);
   const [selectedFields, setSelectedFields] = useState<FieldFeature[]>([]);
   const mapRef = useRef<FieldMapHandle>(null);
@@ -64,19 +67,24 @@ function App() {
             <span className="header-subtitle">Agricultural General Intelligence</span>
           </span>
         </div>
+        <button type="button" className="button-secondary header-about" onClick={() => setShowAbout(value => !value)}>
+          {showAbout ? <ArrowLeft size={18} aria-hidden="true" /> : <Info size={18} aria-hidden="true" />}
+          {showAbout ? "Back to app" : "About"}
+        </button>
       </header>
 
-      {step === "location" && <LocationStep onLocated={handleLocationSelected} />}
+      <div className={`app-view${showAbout ? " app-view--hidden" : ""}`}>
+        {step === "location" && <LocationStep onLocated={handleLocationSelected} />}
 
-      {step === "results" && (
-        <ResultsStep
-          fieldCount={submittedFields.length}
-          onBack={() => setStep("form")}
-          onStartOver={startOver}
-        />
-      )}
+        {step === "results" && (
+          <ResultsStep
+            fieldCount={submittedFields.length}
+            onBack={() => setStep("form")}
+            onStartOver={startOver}
+          />
+        )}
 
-      {step !== "location" && step !== "results" && location && (
+        {step !== "location" && step !== "results" && location && (
         <main className={`field-workspace${step === "form" ? " field-workspace--form" : ""}`}>
           <Suspense fallback={<div className="map-loading" role="status">Opening your field map…</div>}>
             <Map
@@ -112,7 +120,10 @@ function App() {
             )}
           </aside>
         </main>
-      )}
+        )}
+      </div>
+
+      {showAbout && <AboutStep />}
     </>
   );
 }
