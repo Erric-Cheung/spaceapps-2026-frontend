@@ -147,7 +147,16 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
               </select>
               {input.crop === OTHER_CROP && <><label htmlFor='review-other-crop'>Crop name <span className='required-mark' aria-hidden='true'>*</span></label><input id='review-other-crop' required value={input.otherCrop} onChange={event => update({ otherCrop: event.target.value })} placeholder='Enter the crop you grew' /></>}
               <label htmlFor='review-ready-date'>Next planting date <span className='required-mark' aria-hidden='true'>*</span></label>
-              <input id='review-ready-date' type='date' required value={input.readyDate} onChange={event => update({ readyDate: event.target.value })} />
+              <input
+                id='review-ready-date'
+                type='date'
+                required
+                value={input.readyDate}
+                onClick={event => {
+                  try { event.currentTarget.showPicker?.() } catch { /* native picker unavailable */ }
+                }}
+                onChange={event => update({ readyDate: event.target.value })}
+              />
               <p className='review-input-hint'>When will this field be available to plant again? We use this date to predict the next crop rotation.</p>
               {input.confirmed && <p className='review-confirmed-message' role='status'>Confirmed: {cropAnswer(input)}. You can still change your answer.</p>}
             </div>

@@ -37,13 +37,23 @@
         flex-direction: column;
     }
 
-    .field-panel {
+    .field-workspace .field-map {
         flex: 0 0 auto;
-        max-height: 66dvh;
+        height: clamp(320px, 52dvh, 520px);
+        min-height: 320px;
+    }
+
+    .field-panel {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
         width: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
         border-left: 0;
         border-top: 1px solid var(--border);
         border-radius: 0;
     }
 
+    .field-workspace--form .field-panel { overflow-y: hidden; }
 }

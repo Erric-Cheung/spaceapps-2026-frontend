@@ -27,7 +27,7 @@
 .results-details p + p { margin-top: 12px; }
 .results-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 @media (max-width: 650px) {
-    .results-step { width: calc(100% - 40px); }
+    .results-step { width: calc(100% - 40px); margin-top: 20px; }
     .results-step .step-header { margin-bottom: 24px; }
     .results-field-heading { align-items: flex-start; }
     .results-years { grid-template-columns: 1fr; }

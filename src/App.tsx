@@ -74,9 +74,14 @@ function App() {
             <span className="header-subtitle">Agricultural General Intelligence</span>
           </span>
         </div>
-        <button type="button" className="button-secondary header-about" onClick={() => setShowAbout(value => !value)}>
+        <button
+          type="button"
+          className="button-secondary header-about"
+          aria-label={showAbout ? "Back to app" : "About"}
+          onClick={() => setShowAbout(value => !value)}
+        >
           {showAbout ? <ArrowLeft size={18} aria-hidden="true" /> : <Info size={18} aria-hidden="true" />}
-          {showAbout ? "Back to app" : "About"}
+          <span className="header-about-label">{showAbout ? "Back to app" : "About"}</span>
         </button>
       </header>
 

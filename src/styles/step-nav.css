@@ -1,5 +1,10 @@
 .header-about { flex-shrink: 0; }
 
+@media (max-width: 650px) {
+    .header-about { padding-inline: 14px; }
+    .header-about-label { display: none; }
+}
+
 .step-header {
     display: flex;
     align-items: center;

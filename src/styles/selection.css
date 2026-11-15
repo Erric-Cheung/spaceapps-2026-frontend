@@ -161,7 +161,7 @@
     .selection-list-toggle {
         display: inline-flex;
         align-self: flex-start;
-        margin-left: 20px;
+        margin: 8px 0 0 20px;
         font-size: 0.875rem;
     }
     .selection-details {
@@ -178,6 +178,6 @@
     }
     .selection-panel {
         height: auto;
-        max-height: 66dvh;
+        max-height: none;
     }
 }
