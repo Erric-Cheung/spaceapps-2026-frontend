@@ -128,7 +128,7 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
                 {fieldHistory.summary?.notes.map(note => <p key={note}>{note}</p>)}
               </details>}
               <Suspense fallback={<p role='status'>Loading satellite imagery...</p>}>
-                <FieldImagerySlider boundary={field.geometry} fieldName={`Field ${number}`} showImagery sampleImagery />
+                <FieldImagerySlider boundary={field.geometry} fieldId={id} fieldName={`Field ${number}`} showImagery />
               </Suspense>
             </div>
 
