@@ -171,7 +171,8 @@
     .selection-panel--expanded .selection-details {
         display: block;
         flex: 0 1 auto;
-        max-height: 24dvh;
+        max-height: none;
+        overflow: visible;
     }
     .selection-actions {
         padding: 10px 20px max(12px, env(safe-area-inset-bottom));
