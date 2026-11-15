@@ -96,7 +96,7 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
 
         <section className='review-current' aria-labelledby='review-current-title' key={id}>
           <div className='review-field-heading'>
-            <div><p className='review-position'>Field {activeIndex + 1} of {fields.length}</p><h3 id='review-current-title'>Field {number}</h3><p>{field.properties.areaAcres == null ? 'Area unavailable' : `About ${field.properties.areaAcres.toLocaleString(undefined, { maximumFractionDigits: 1 })} acres`}</p></div>
+            <div><h3 id='review-current-title'>Field {number}</h3><p>{field.properties.areaAcres == null ? 'Area unavailable' : `About ${field.properties.areaAcres.toLocaleString(undefined, { maximumFractionDigits: 1 })} acres`}</p></div>
             <FieldOutline field={field} />
           </div>
 

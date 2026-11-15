@@ -45,7 +45,12 @@ function App() {
     <>
       <header className={step === "location" ? "landing-header" : undefined}>
         <div className="header-brand">
-          <h1>Money Stealer</h1>
+          <img className="header-icon" src="/logo.png" alt="" width={44} height={44} aria-hidden="true" />
+          <span className="header-divider" aria-hidden="true" />
+          <span className="header-copy">
+            <span className="header-title">AGI</span>
+            <span className="header-subtitle">Agricultural General Intelligence</span>
+          </span>
         </div>
       </header>
 
