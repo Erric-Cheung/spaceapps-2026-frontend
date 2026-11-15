@@ -11,9 +11,9 @@ import type { CropHistoryResponse } from "./data/cropHistory";
 import { useCropHistory } from "./data/cropHistoryCache";
 import type { FieldMapHandle } from "./components/Map";
 import type { FieldReviewInput } from "./data/fieldReview";
+import type { SubmittedField } from "./data/cropPlanning";
 
 type Step = "location" | "fields" | "form" | "results";
-type SubmittedField = { fieldId: string; crop: string; readyDate: string };
 const Map = lazy(() => import("./components/Map.tsx"));
 
 function App() {
@@ -78,7 +78,8 @@ function App() {
 
         {step === "results" && (
           <ResultsStep
-            fieldCount={submittedFields.length}
+            fields={selectedFields}
+            answers={submittedFields}
             onBack={() => setStep("form")}
             onStartOver={startOver}
           />
