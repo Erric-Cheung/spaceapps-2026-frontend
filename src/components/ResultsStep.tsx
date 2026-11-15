@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Skeleton, SkulletProvider } from 'skullet/react'
 import { MapPinned } from 'lucide-react'
 import type { FieldFeature } from '../data/fields'
 import { fetchCropPlan, type CropPlanResult, type PlanProgress, type RotationChoice, type SubmittedField } from '../data/cropPlanning'
@@ -56,6 +57,7 @@ function ResultsStep({ fields, answers, mappedCrops, onBack, onStartOver }: Prop
   }, [fields, answers, attempt])
 
   const result = state.status === 'ready' ? state.result : null
+  const sample = useMemo(() => sampleResult(answers), [answers])
   return (
     <main className='results-step'>
       <div className='step-header'>
@@ -69,13 +71,30 @@ function ResultsStep({ fields, answers, mappedCrops, onBack, onStartOver }: Prop
         The second and third leave out the main crop of the one before, in case you would rather not grow it.
       </p>
 
-      {state.status === 'loading' && <p className='results-status' role='status'>{loadingText(state.progress, answers.length)}</p>}
+      {state.status === 'loading' && <p className='results-progress' role='status'>{loadingText(state.progress, answers.length)}</p>}
       {state.status === 'error' && <div className='results-status'>
         <p role='alert'>{state.message}</p>
         <button type='button' className='button-primary' onClick={() => { setState({ status: 'loading', progress: null }); setAttempt(value => value + 1) }}>Try again</button>
       </div>}
 
-      {result && <>
+      {state.status !== 'error' && <SkulletProvider theme={SKULLET_THEME} mode='light'>
+        <Skeleton data={result} sample={sample} id={`results-${answers.length}`} label='Loading rotation options'>
+          {result => <ResultsBody result={result} fields={fields} answers={answers} />}
+        </Skeleton>
+      </SkulletProvider>}
+      <div className='results-actions'>
+        <button type='button' className='button-secondary' onClick={onStartOver}>
+          <MapPinned size={18} aria-hidden='true' />Plan another location
+        </button>
+      </div>
+    </main>
+  )
+}
+
+/** Every field's three options and the notes about them; also drawn from a sample as the loading skeleton. */
+function ResultsBody({ result, fields, answers }: { result: CropPlanResult; fields: FieldFeature[]; answers: SubmittedField[] }) {
+  return (
+      <>
         <div className='results-plans'>
           {result.fields.map(plan => {
             const field = fields.find(field => field.properties.id === plan.fieldId)!
@@ -116,19 +135,20 @@ function ResultsStep({ fields, answers, mappedCrops, onBack, onStartOver }: Prop
                       {option.tradeoff && <p className='results-tradeoff'>{option.tradeoff}</p>}
                       {option.years.some(year => year.reasons?.length || year.rationale) && <details className='results-rationale'>
                         <summary>Why each crop was chosen</summary>
-                        <ol>{option.years.map(year => <li key={year.year}>
+                        {/* Closed disclosures are not on screen, so the skeleton must not draw them. */}
+                        <div skullet-ignore=''><ol>{option.years.map(year => <li key={year.year}>
                           <strong>{year.year}: {year.crop}</strong>
                           {year.reasons?.length
                             ? <ul>{year.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>
                             : <p>{year.rationale}</p>}
-                        </li>)}</ol>
+                        </li>)}</ol></div>
                       </details>}
                     </section>
                   ))}
                 </div>
                 {plan.assumptions.length > 0 && <details className='results-rationale'>
                   <summary>What the planner had to assume for this field</summary>
-                  <ul className='results-assumptions'>{plan.assumptions.map(item => <li key={item}>{item}</li>)}</ul>
+                  <div skullet-ignore=''><ul className='results-assumptions'>{plan.assumptions.map(item => <li key={item}>{item}</li>)}</ul></div>
                 </details>}
               </>}
             </section>
@@ -136,6 +156,7 @@ function ResultsStep({ fields, answers, mappedCrops, onBack, onStartOver }: Prop
         </div>
         <details className='results-details'>
           <summary>About these plans</summary>
+          <div skullet-ignore=''>
           {result.disclaimer && <p>{result.disclaimer}</p>}
           <p>
             Soil health adds up the planner's yearly soil scores for pest and disease breaks, nitrogen, organic matter and ground cover.
@@ -144,15 +165,52 @@ function ResultsStep({ fields, answers, mappedCrops, onBack, onStartOver }: Prop
           </p>
           {result.exampleData && <p>Income uses example margins for each crop, not local prices: {result.catalogNote}</p>}
           <p>The planner chooses from {result.catalog.map(crop => crop.name).join(', ')}. Your confirmed crop and planting date are kept with each field.</p>
+          </div>
         </details>
-      </>}
-      <div className='results-actions'>
-        <button type='button' className='button-secondary' onClick={onStartOver}>
-          <MapPinned size={18} aria-hidden='true' />Plan another location
-        </button>
-      </div>
-    </main>
+      </>
   )
+}
+
+/** Skeleton colours from the app's palette: brand ink at 8% on paper, with a paper-coloured shimmer. */
+const SKULLET_THEME = {
+  light: { base: 'rgb(88 64 46 / 0.08)', highlight: 'rgb(247 246 242 / 0.7)' },
+  dark: { base: 'rgb(88 64 46 / 0.08)', highlight: 'rgb(247 246 242 / 0.7)' },
+  animation: 'shimmer',
+  speed: 'slow',
+  radius: '6px',
+} as const
+
+const SAMPLE_YEARS = ['Soybeans', 'Wheat', 'Corn', 'Soybeans', 'Wheat']
+
+/**
+ * Layout-only stand-in for a plan, shaped like the real one (three options of five years per
+ * confirmed field) so the skeleton takes the space the results will. Never shown as text.
+ */
+function sampleResult(answers: SubmittedField[]): CropPlanResult {
+  const firstYear = Number(answers[0]?.readyDate.slice(0, 4)) || new Date().getFullYear()
+  const titles = ['Best match for this field', 'Without soybeans', 'Without soybeans or wheat']
+  return {
+    planner: '', temporary: true, disclaimer: '', exampleData: false, catalog: [],
+    fields: answers.map(answer => ({
+      fieldId: answer.fieldId,
+      status: 'planned',
+      answer: answer.crop,
+      startCrop: answer.crop,
+      mappedStart: false,
+      assumptions: ['Sample'],
+      options: titles.map((title, index) => ({
+        id: `option-${index + 1}`,
+        title,
+        summary: 'The planner\'s best rotation for soil health and for how well each crop suits this field.',
+        excluded: [],
+        years: SAMPLE_YEARS.map((crop, offset) => ({ year: firstYear + offset, crop, reliability: 0.8, reasons: ['Sample'] })),
+        benefits: [],
+        tradeoff: '',
+        totalSoilScore: 0.5,
+        totalIncome: 10000,
+      })),
+    })),
+  }
 }
 
 /** The three options side by side on the measures the planner reports. */
