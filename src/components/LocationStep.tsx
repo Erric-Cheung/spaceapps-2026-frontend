@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LocateFixed, Map as MapIcon } from 'lucide-react'
 import AddressSearch from './AddressSearch'
 import { toLocation, type GeoLocation } from '../data/geocode'
 
@@ -57,12 +58,16 @@ function LocationStep({ onLocated }: Props) {
         onPick={place => onLocated(toLocation(place))}
       />
       <button type='button' className='button-secondary location-geo' onClick={useMyLocation} disabled={busy}>
+        <LocateFixed size={18} aria-hidden='true' />
         {busy ? 'Finding your location...' : 'Use my current location'}
       </button>
       {error && <p className='location-error' role='alert'>{error}</p>}
 
       <div className='location-example'>
-        <button type='button' className='button-secondary' onClick={() => onLocated(EXAMPLE_LOCATION)}>Explore example fields</button>
+        <button type='button' className='button-secondary' onClick={() => onLocated(EXAMPLE_LOCATION)}>
+          <MapIcon size={18} aria-hidden='true' />
+          Explore example fields
+        </button>
         <p>Try the map near Orillia, Ontario, without entering a location.</p>
       </div>
 

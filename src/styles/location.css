@@ -4,12 +4,10 @@
     background: var(--paper);
 }
 
-.landing-header h1 { font-size: 22px; }
-
 .location-step {
     width: min(100% - 48px, 580px);
     margin: clamp(32px, 7vh, 72px) auto 40px;
-    font-size: 17px;
+    font-size: 1.0625rem;
     line-height: 1.6;
 }
 
@@ -28,7 +26,7 @@
     gap: 20px;
     list-style: none;
     color: var(--ink-muted);
-    font-size: .88em;
+    font-size: 0.875rem;
 }
 
 .location-steps li[aria-current='step'] {
@@ -41,7 +39,6 @@
 
 .location-step h2 {
     padding: 0;
-    font-size: 1.9em;
     line-height: 1.25;
     font-weight: 700;
     letter-spacing: -.025em;
@@ -56,7 +53,7 @@
 .location-step .address-search button:hover { background: var(--brand-hover); }
 .location-step .address-search-results { max-height: 280px; overflow-y: auto; }
 .location-step .address-search-results li { padding: 12px 14px; }
-.location-step .address-search-results li span { font-size: .88em; }
+.location-step .address-search-results li span { font-size: 0.875rem; }
 
 .location-geo { margin-top: 14px; }
 .location-geo:disabled { cursor: wait; }
@@ -72,9 +69,9 @@
     padding: 0 12px;
     background: var(--paper);
     color: var(--ink-muted);
-    font-size: .88em;
+    font-size: 0.875rem;
 }
-.location-example p { margin-top: 10px; color: var(--ink-muted); font-size: .94em; }
+.location-example p { margin-top: 10px; color: var(--ink-muted); font-size: 0.9375rem; }
 
 .location-step button:focus-visible {
     outline: 3px solid var(--brand);
@@ -84,7 +81,6 @@
 
 @media (max-width: 650px) {
     .landing-header { padding: 18px 24px; }
-    .landing-header h1 { font-size: 20px; }
     .location-topline { margin-bottom: 24px; gap: 10px 16px; }
     .location-steps { gap: 14px; }
     .location-step .address-search-row { flex-direction: column; }

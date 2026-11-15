@@ -1,6 +1,6 @@
 .address-search {
   position: relative;
-  font: 16px/1.4 var(--font-sans); /* 16px stops iOS zooming in on focus */
+  font: 1rem/1.4 var(--font-sans); /* 1rem stops iOS zooming in on focus */
   color: var(--ink);
 }
 
@@ -27,12 +27,15 @@
 .address-search input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
 
 .address-search button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 0 14px;
   border: 0;
   border-radius: 0 7px 7px 0;
   background: var(--brand);
   color: var(--on-brand);
-  font: 700 15px var(--font-sans);
+  font: 700 0.9375rem var(--font-sans);
   cursor: pointer;
 }
 

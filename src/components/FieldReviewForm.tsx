@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, type FormEvent } from 'react'
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
 import type { FieldFeature } from '../data/fields'
 import type { CropHistoryResponse } from '../data/cropHistory'
 import { crops } from '../data/crops'
@@ -27,7 +28,7 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
   const confirmedCount = fields.filter(field => inputs[field.properties.id]?.confirmed).length
   const allConfirmed = fields.length > 0 && confirmedCount === fields.length
 
-  if (!field) return <div className='review-empty'><p>No fields selected.</p><button type='button' className='button-secondary' onClick={onClose}>Back to field selection</button></div>
+  if (!field) return <div className='review-empty'><p>No fields selected.</p><button type='button' className='button-secondary' onClick={onClose}><ArrowLeft size={18} aria-hidden='true' />Back to field selection</button></div>
 
   const id = field.properties.id
   const input = inputs[id] ?? EMPTY_REVIEW
@@ -63,7 +64,7 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
     <form className='field-review-form' onSubmit={submit}>
       <div className='review-heading'>
         <div className='review-topline'>
-          <button className='button-secondary review-back' type='button' onClick={onClose}>Back to field selection</button>
+          <button className='button-secondary review-back' type='button' onClick={onClose}><ArrowLeft size={18} aria-hidden='true' />Back to field selection</button>
           <ol className='review-steps' aria-label='Field planning steps'><li>1. Location</li><li>2. Fields</li><li aria-current='step'>3. Crops</li></ol>
         </div>
         <div className='review-title-row'>
@@ -112,7 +113,7 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
                 </ol>
                 {fieldHistory?.summary?.pattern && <p className='review-pattern'>{fieldHistory.summary.pattern.text}</p>}
               </> : <p className='review-no-history' role='status'>{historyFailed ? 'Crop history is unavailable. You can still confirm what grows here.' : fieldHistory ? fieldHistory.years.length ? 'Field analysis is unavailable. You can enter your crop.' : 'No crop maps are available for this field.' : 'Loading crop history. You can enter your crop now.'}</p>}
-              {historyFailed && !fieldHistory && <button type='button' className='button-secondary review-text-button' onClick={onRetryHistory}>Retry crop history</button>}
+              {historyFailed && !fieldHistory && <button type='button' className='button-secondary review-text-button' onClick={onRetryHistory}><RotateCcw size={16} aria-hidden='true' />Retry crop history</button>}
 
               {fieldHistory && <details className='review-history-details'>
                 <summary>Full history and source</summary>
@@ -133,7 +134,7 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
               {suggestedCrop && <div className='review-suggestion'>
                 <p>{suggestion?.reason}</p>
                 {suggestion?.confidence && <p className='review-suggestion-reason'>Pattern support: {suggestion.confidence}.</p>}
-                <button type='button' className='button-secondary review-use-crop' onClick={() => update({ crop: suggestedCrop })}>Use {suggestedCrop.toLowerCase()}</button>
+                <button type='button' className='button-secondary review-use-crop' onClick={() => update({ crop: suggestedCrop })}><Check size={16} aria-hidden='true' />Use {suggestedCrop.toLowerCase()}</button>
               </div>}
               {suggestion?.status === 'unavailable' && <p className='review-no-history'>{suggestion.reason}</p>}
               <label htmlFor='review-crop'>{suggestedCrop ? 'Or choose a different answer' : 'What grew here in the latest season?'}</label>
@@ -154,14 +155,14 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
 
       <div className='review-actions'>
         <div className='review-paging'>
-          <button type='button' className='button-secondary' disabled={activeIndex === 0} onClick={() => setActiveId(fields[activeIndex - 1].properties.id)}>Previous</button>
+          <button type='button' className='button-secondary' disabled={activeIndex === 0} onClick={() => setActiveId(fields[activeIndex - 1].properties.id)}><ChevronLeft size={18} aria-hidden='true' />Previous</button>
           <span>{activeIndex + 1} / {fields.length}</span>
-          <button type='button' className='button-secondary' disabled={activeIndex === fields.length - 1} onClick={() => setActiveId(fields[activeIndex + 1].properties.id)}>Next</button>
+          <button type='button' className='button-secondary' disabled={activeIndex === fields.length - 1} onClick={() => setActiveId(fields[activeIndex + 1].properties.id)}>Next<ChevronRight size={18} aria-hidden='true' /></button>
         </div>
         <div className='review-confirm-action'>
           {allConfirmed && <p className='review-all-confirmed' role='status'>All fields confirmed.</p>}
-          {allConfirmed && onSubmit ? <button type='submit' className='review-primary'>Get crop rotation suggestions</button> :
-            <button type='button' className='review-primary' disabled={!canConfirm(input) || input.confirmed} onClick={confirm}>{input.confirmed ? 'Field confirmed' : confirmedCount === fields.length - 1 ? 'Confirm field' : 'Confirm field and next'}</button>}
+          {allConfirmed && onSubmit ? <button type='submit' className='review-primary'>Get crop rotation suggestions<ArrowRight size={18} aria-hidden='true' /></button> :
+            <button type='button' className='review-primary' disabled={!canConfirm(input) || input.confirmed} onClick={confirm}><Check size={18} aria-hidden='true' />{input.confirmed ? 'Field confirmed' : confirmedCount === fields.length - 1 ? 'Confirm field' : 'Confirm field and next'}</button>}
         </div>
       </div>
     </form>

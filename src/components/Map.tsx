@@ -1,4 +1,5 @@
 import { useEffect, useImperativeHandle, useRef, useState, type ReactNode, type Ref, type RefObject } from 'react'
+import { RotateCcw } from 'lucide-react'
 import maplibregl, { type ExpressionSpecification, type GeoJSONSource } from 'maplibre-gl'
 import type { FeatureCollection, Point } from 'geojson'
 import AddressSearch from './AddressSearch'
@@ -322,7 +323,7 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
           {status === 'error' && (
             <>
               <p>Could not load fields.</p>
-              <button type="button" onClick={() => retryRef.current()}>Try again</button>
+              <button type="button" onClick={() => retryRef.current()}><RotateCcw size={16} aria-hidden="true" />Try again</button>
             </>
           )}
         </div>

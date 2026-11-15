@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ArrowRight, List } from 'lucide-react'
 import type { FieldFeature } from '../data/fields'
 import SelectedFields from './SelectedFields'
 
@@ -34,6 +35,7 @@ function FieldSelectionPanel({ fields, highlightedId, onContinue, onLocate, onRe
       </div>
 
       <button type='button' className='button-secondary selection-list-toggle' aria-expanded={expanded} aria-controls='selection-details' onClick={() => setExpanded(value => !value)}>
+        <List size={16} aria-hidden='true' />
         {expanded ? 'Hide field list' : 'Show field list'}
       </button>
 
@@ -51,7 +53,10 @@ function FieldSelectionPanel({ fields, highlightedId, onContinue, onLocate, onRe
       </div>
 
       <div className='selection-actions'>
-        <button type='button' className='selection-continue' disabled={count === 0} onClick={onContinue}>Continue to crop confirmation</button>
+        <button type='button' className='selection-continue' disabled={count === 0} onClick={onContinue}>
+          Continue to crop confirmation
+          <ArrowRight size={18} aria-hidden='true' />
+        </button>
       </div>
     </div>
   )

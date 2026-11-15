@@ -20,7 +20,7 @@
   pointer-events: none;
   z-index: 2;
 }
-.fp-root .maplibregl-ctrl-attrib { background: color-mix(in srgb, var(--fp-paper) 85%, transparent); color: var(--fp-muted); font-size: 10px; }
+.fp-root .maplibregl-ctrl-attrib { background: color-mix(in srgb, var(--fp-paper) 85%, transparent); color: var(--fp-muted);   font-size: 0.625rem; }
 .fp-root .maplibregl-ctrl-attrib a { color: var(--fp-muted); }
 .fp-root .maplibregl-ctrl-group { background: var(--fp-paper); box-shadow: 0 0 0 1px var(--fp-grid); border-radius: 10px; }
 .fp-root .maplibregl-ctrl-group button + button { border-top-color: var(--fp-grid); }
@@ -40,11 +40,14 @@
   border-radius: 8px;
   background: var(--paper);
   color: var(--ink);
-  font: 700 15px/1.4 var(--font-sans);
+  font: 700 0.9375rem/1.4 var(--font-sans);
   z-index: 3;
 }
 
 .field-map-status button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-right: -8px;
   min-height: 44px;
   padding: 0 14px;
