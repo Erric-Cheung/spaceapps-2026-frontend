@@ -2,6 +2,7 @@ import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import FieldReviewForm from "./components/FieldReviewForm.tsx";
 import LocationStep from "./components/LocationStep.tsx";
 import FieldSelectionPanel from "./components/FieldSelectionPanel.tsx";
+import ResultsStep from "./components/ResultsStep.tsx";
 import type { FieldFeature } from "./data/fields";
 import type { GeoLocation } from "./data/geocode";
 import type { CropHistoryResponse } from "./data/cropHistory";
@@ -9,7 +10,8 @@ import { useCropHistory } from "./data/cropHistoryCache";
 import type { FieldMapHandle } from "./components/Map";
 import type { FieldReviewInput } from "./data/fieldReview";
 
-type Step = "location" | "fields" | "form";
+type Step = "location" | "fields" | "form" | "results";
+type SubmittedField = { fieldId: string; crop: string; readyDate: string };
 const Map = lazy(() => import("./components/Map.tsx"));
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
   const [selectedFields, setSelectedFields] = useState<FieldFeature[]>([]);
   const mapRef = useRef<FieldMapHandle>(null);
   const [reviewInputs, setReviewInputs] = useState<Record<string, FieldReviewInput>>({});
+  const [submittedFields, setSubmittedFields] = useState<SubmittedField[]>([]);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const selectedIds = useMemo(() => selectedFields.map(field => field.properties.id), [selectedFields]);
   const { entries, retry } = useCropHistory(selectedIds);
@@ -38,7 +41,16 @@ function App() {
     setLocation(next);
     setSelectedFields([]);
     setReviewInputs({});
+    setSubmittedFields([]);
     setStep("fields");
+  };
+
+  const startOver = () => {
+    setLocation(null);
+    setSelectedFields([]);
+    setReviewInputs({});
+    setSubmittedFields([]);
+    setStep("location");
   };
 
   return (
@@ -56,7 +68,15 @@ function App() {
 
       {step === "location" && <LocationStep onLocated={handleLocationSelected} />}
 
-      {step !== "location" && location && (
+      {step === "results" && (
+        <ResultsStep
+          fieldCount={submittedFields.length}
+          onBack={() => setStep("form")}
+          onStartOver={startOver}
+        />
+      )}
+
+      {step !== "location" && step !== "results" && location && (
         <main className={`field-workspace${step === "form" ? " field-workspace--form" : ""}`}>
           <Suspense fallback={<div className="map-loading" role="status">Opening your field map…</div>}>
             <Map
@@ -76,6 +96,7 @@ function App() {
                 onLocate={field => mapRef.current?.focusField(field)}
                 onRemove={id => mapRef.current?.removeField(id)}
                 onHighlight={highlightField}
+                onBack={startOver}
               />
             ) : (
               <FieldReviewForm
@@ -86,6 +107,7 @@ function App() {
                 historyEntries={entries}
                 onRetryHistory={retry}
                 onClose={() => setStep("fields")}
+                onSubmit={answers => { setSubmittedFields(answers); setStep("results"); }}
               />
             )}
           </aside>

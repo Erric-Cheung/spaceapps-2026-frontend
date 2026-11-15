@@ -109,19 +109,14 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: 1px solid #c6beb3;
   border-radius: 8px;
   padding: 10px 14px;
-  background: #faf9f6;
-  color: #58402e;
-  cursor: pointer;
-}
-.imagery-controls > button:disabled {
-  opacity: 0.35;
-  cursor: default;
 }
 .imagery-controls > button:focus-visible,
-.imagery-image-status button:focus-visible,
+.imagery-image-status button:focus-visible {
+  outline: 3px solid var(--brand-green);
+  outline-offset: 3px;
+}
 .imagery input:focus-visible {
   outline: 3px solid #9a7420;
   outline-offset: 3px;

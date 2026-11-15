@@ -11,9 +11,11 @@ export const OTHER_CROP = '__other__'
 export const NO_CROP = '__none__'
 export const UNKNOWN_CROP = '__unknown__'
 
-/** A specific crop or an explicit unknown answer can be confirmed without a date. */
+/** A specific crop or an explicit unknown answer needs a planting date to be confirmed. */
 export function canConfirm(input: FieldReviewInput) {
-  return input.crop !== '' && (input.crop !== OTHER_CROP || input.otherCrop.trim() !== '')
+  return input.crop !== ''
+    && (input.crop !== OTHER_CROP || input.otherCrop.trim() !== '')
+    && input.readyDate.trim() !== ''
 }
 
 /** Converts the form choice to the farmer's answer, without using mapped estimates. */

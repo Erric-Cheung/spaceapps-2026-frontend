@@ -25,7 +25,8 @@ list and map. On phones, Show field list expands the selection panel.
 Crop history starts loading on selection, with at most two requests in flight.
 Results are reused for the session. Continue opens crop confirmation immediately;
 missing or failed history never prevents manual entry, and failed requests can be
-retried. Current crops start blank and arriving history does not replace entries.
+retried. History suggests a crop when a field has no answer yet, but never replaces an answer
+the farmer has entered.
 
 Local browser verification at 1440 x 900 and 390 x 844 checked selection, removal,
 field location, and consecutive numbering. With history deliberately delayed, opening

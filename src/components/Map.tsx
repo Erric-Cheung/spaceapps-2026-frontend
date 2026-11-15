@@ -323,7 +323,7 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
           {status === 'error' && (
             <>
               <p>Could not load fields.</p>
-              <button type="button" onClick={() => retryRef.current()}><RotateCcw size={16} aria-hidden="true" />Try again</button>
+              <button type="button" className="button-primary" onClick={() => retryRef.current()}><RotateCcw size={16} aria-hidden="true" />Try again</button>
             </>
           )}
         </div>

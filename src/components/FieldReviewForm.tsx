@@ -5,7 +5,9 @@ import type { CropHistoryResponse } from '../data/cropHistory'
 import { crops } from '../data/crops'
 import type { HistoryEntry } from '../data/cropHistoryCache'
 import { canConfirm, cropAnswer, EMPTY_REVIEW, OTHER_CROP, NO_CROP, UNKNOWN_CROP, type FieldReviewInput } from '../data/fieldReview'
+import BackButton from './BackButton'
 import FieldOutline from './FieldOutline'
+import StepNav from './StepNav'
 
 const FieldImagerySlider = lazy(() => import('./FieldImagerySlider'))
 
@@ -31,7 +33,6 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
   if (!field) return <div className='review-empty'><p>No fields selected.</p><button type='button' className='button-secondary' onClick={onClose}><ArrowLeft size={18} aria-hidden='true' />Back to field selection</button></div>
 
   const id = field.properties.id
-  const input = inputs[id] ?? EMPTY_REVIEW
   const result = history?.results.find(result => result.id === id)
   const fieldHistory = result?.history
   const historyFailed = historyEntries[id]?.status === 'error'
@@ -40,6 +41,8 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
   const suggestion = summary?.currentCrop
   const suggestedCrop = suggestion?.crop
   const year = summary?.reviewYear
+  const savedInput = inputs[id] ?? EMPTY_REVIEW
+  const input = !savedInput.crop && suggestedCrop ? { ...savedInput, crop: suggestedCrop } : savedInput
   const options = [...new Set([...crops, ...[suggestedCrop, input.crop].filter((crop): crop is string => typeof crop === 'string' && crop.length > 0 && !crop.startsWith('__'))])]
   const number = field.properties.selectionNumber ?? activeIndex + 1
   const slots = summary?.recentYears ?? []
@@ -63,9 +66,9 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
   return (
     <form className='field-review-form' onSubmit={submit}>
       <div className='review-heading'>
-        <div className='review-topline'>
-          <button className='button-secondary review-back' type='button' onClick={onClose}><ArrowLeft size={18} aria-hidden='true' />Back to field selection</button>
-          <ol className='review-steps' aria-label='Field planning steps'><li>1. Location</li><li>2. Fields</li><li aria-current='step'>3. Crops</li></ol>
+        <div className='step-header'>
+          <BackButton label='Back to fields' onClick={onClose} />
+          <StepNav current='form' />
         </div>
         <div className='review-title-row'>
           <div><h2>Confirm your crops</h2><p>Check each field against your records. Change anything that looks wrong.</p></div>
@@ -134,19 +137,18 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
               {suggestedCrop && <div className='review-suggestion'>
                 <p>{suggestion?.reason}</p>
                 {suggestion?.confidence && <p className='review-suggestion-reason'>Pattern support: {suggestion.confidence}.</p>}
-                <button type='button' className='button-secondary review-use-crop' onClick={() => update({ crop: suggestedCrop })}><Check size={16} aria-hidden='true' />Use {suggestedCrop.toLowerCase()}</button>
               </div>}
               {suggestion?.status === 'unavailable' && <p className='review-no-history'>{suggestion.reason}</p>}
-              <label htmlFor='review-crop'>{suggestedCrop ? 'Or choose a different answer' : 'What grew here in the latest season?'}</label>
+              <label htmlFor='review-crop'>{suggestedCrop ? 'Crop' : 'What grew here in the latest season?'}</label>
               <select id='review-crop' value={input.crop} onChange={event => update({ crop: event.target.value })}>
-                <option value=''>Choose a crop</option>
+                {!suggestedCrop && <option value=''>Choose a crop</option>}
                 {options.map(crop => <option key={crop} value={crop}>{crop}</option>)}
                 <option value={OTHER_CROP}>Other crop</option><option value={NO_CROP}>Nothing planted</option><option value={UNKNOWN_CROP}>I’m not sure</option>
               </select>
               {input.crop === OTHER_CROP && <><label htmlFor='review-other-crop'>Crop name</label><input id='review-other-crop' value={input.otherCrop} onChange={event => update({ otherCrop: event.target.value })} placeholder='Enter the crop you grew' /></>}
-              <label htmlFor='review-ready-date'>Next planting date <span>(optional)</span></label>
-              <input id='review-ready-date' type='date' value={input.readyDate} onChange={event => update({ readyDate: event.target.value })} />
-              <p className='review-input-hint'>When will this field be available to plant again? Leave blank if you don’t know yet.</p>
+              <label htmlFor='review-ready-date'>Next planting date</label>
+              <input id='review-ready-date' type='date' required value={input.readyDate} onChange={event => update({ readyDate: event.target.value })} />
+              <p className='review-input-hint'>When will this field be available to plant again? We use this date to predict the next crop rotation.</p>
               {input.confirmed && <p className='review-confirmed-message' role='status'>Confirmed: {cropAnswer(input)}. You can still change your answer.</p>}
             </div>
           </div>
@@ -161,8 +163,8 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
         </div>
         <div className='review-confirm-action'>
           {allConfirmed && <p className='review-all-confirmed' role='status'>All fields confirmed.</p>}
-          {allConfirmed && onSubmit ? <button type='submit' className='review-primary'>Get crop rotation suggestions<ArrowRight size={18} aria-hidden='true' /></button> :
-            <button type='button' className='review-primary' disabled={!canConfirm(input) || input.confirmed} onClick={confirm}><Check size={18} aria-hidden='true' />{input.confirmed ? 'Field confirmed' : confirmedCount === fields.length - 1 ? 'Confirm field' : 'Confirm field and next'}</button>}
+          {allConfirmed && onSubmit ? <button type='submit' className='button-primary review-primary'>Get crop rotation suggestions<ArrowRight size={18} aria-hidden='true' /></button> :
+            <button type='button' className='button-primary review-primary' disabled={!canConfirm(input) || input.confirmed} onClick={confirm}><Check size={18} aria-hidden='true' />{input.confirmed ? 'Field confirmed' : confirmedCount === fields.length - 1 ? 'Confirm field' : 'Confirm field and next'}</button>}
         </div>
       </div>
     </form>

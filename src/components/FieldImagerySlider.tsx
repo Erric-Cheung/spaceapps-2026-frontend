@@ -164,7 +164,7 @@ export default function FieldImagerySlider({ sampleImagery = false, images = sam
 
       </svg>
       {showImagery && !overlapsField && <div className="imagery-image-status" role="status">The supplied imagery does not cover this field. Imagery for this location is needed.</div>}
-      {canShowImage && scene && overlapsField && imageStatus !== 'ready' && <div className="imagery-image-status" role={imageStatus === 'error' ? 'alert' : 'status'}>{imageStatus === 'loading' ? 'Loading image...' : <><span>Image unavailable from provider.</span><button type="button" onClick={() => { setImageResult(null); setAttempt(attempt + 1) }}><RotateCcw size={16} aria-hidden="true" />Retry</button></>}</div>}
+      {canShowImage && scene && overlapsField && imageStatus !== 'ready' && <div className="imagery-image-status" role={imageStatus === 'error' ? 'alert' : 'status'}>{imageStatus === 'loading' ? 'Loading image...' : <><span>Image unavailable from provider.</span><button type="button" className="button-secondary" onClick={() => { setImageResult(null); setAttempt(attempt + 1) }}><RotateCcw size={16} aria-hidden="true" />Retry</button></>}</div>}
       {mapError && <p className="imagery-map-error" role="alert">The map could not start. Check that WebGL is enabled in your browser.</p>}
     </div>
     {scene ? <>
@@ -172,13 +172,13 @@ export default function FieldImagerySlider({ sampleImagery = false, images = sam
         <strong>{date(scene.datetime)}</strong>
       </div>
       <div className="imagery-controls">
-        <button type="button" aria-label="Previous image" disabled={selected <= 0} onClick={() => setIndex(selected - 1)}><ChevronLeft size={18} aria-hidden="true" /></button>
+        <button type="button" className="button-secondary" aria-label="Previous image" disabled={selected <= 0} onClick={() => setIndex(selected - 1)}><ChevronLeft size={18} aria-hidden="true" /></button>
         <div className="imagery-track">
           <label htmlFor={`${id}-slider`}>Date <span>{selected + 1} / {scenes.length}</span></label>
           <input id={`${id}-slider`} type="range" min="0" max={Math.max(0, scenes.length - 1)} step="1" value={selected} disabled={scenes.length < 2} aria-valuetext={`${date(scene.datetime)}, ${satellite(scene.platform)}`} onChange={event => setIndex(Number(event.target.value))} />
           <div className="imagery-range"><span>{date(scenes[0].datetime)}</span><span>{date(scenes[scenes.length - 1].datetime)}</span></div>
         </div>
-        <button type="button" aria-label="Next image" disabled={selected >= scenes.length - 1} onClick={() => setIndex(selected + 1)}><ChevronRight size={18} aria-hidden="true" /></button>
+        <button type="button" className="button-secondary" aria-label="Next image" disabled={selected >= scenes.length - 1} onClick={() => setIndex(selected + 1)}><ChevronRight size={18} aria-hidden="true" /></button>
       </div>
     </> : <p role="status">No dated images are available for this field.</p>}
   </section>

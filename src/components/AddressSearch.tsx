@@ -96,7 +96,7 @@ export default function AddressSearch({
           onChange={e => onType(e.target.value)}
           onFocus={() => setOpen(true)} onBlur={() => setOpen(false)} onKeyDown={onKeyDown}
         />
-        <button type="submit"><Search size={18} aria-hidden="true" />{buttonLabel}</button>
+        <button type="submit" className="button-primary"><Search size={18} aria-hidden="true" />{buttonLabel}</button>
       </div>
       {showList && (
         <div className="address-search-results">

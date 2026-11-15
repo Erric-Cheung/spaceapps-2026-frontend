@@ -1,3 +1,4 @@
+.button-primary,
 .button-secondary {
   display: inline-flex;
   align-items: center;
@@ -5,17 +6,44 @@
   gap: 8px;
   min-height: 44px;
   padding: 8px 16px;
-  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: var(--surface);
-  color: var(--ink);
   font: inherit;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
 }
 
-.button-secondary:hover:enabled { background: var(--brand-08); }
-.button-secondary:disabled { opacity: .55; cursor: default; }
-.button-secondary:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+.button-primary {
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+.button-primary:hover:enabled {
+  border-color: var(--brand-hover);
+  background: var(--brand-hover);
+}
+
+.button-secondary {
+  border: 1px solid var(--brand-green);
+  background: var(--brand-green);
+  color: var(--surface);
+}
+
+.button-secondary:hover:enabled {
+  border-color: var(--brand-green-mid);
+  background: var(--brand-green-mid);
+}
+
+.button-primary:disabled,
+.button-secondary:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.button-primary:focus-visible,
+.button-secondary:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+}

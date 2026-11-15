@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { LocateFixed, Map as MapIcon } from 'lucide-react'
 import AddressSearch from './AddressSearch'
+import StepNav from './StepNav'
 import { toLocation, type GeoLocation } from '../data/geocode'
 
 type Props = { onLocated: (location: GeoLocation) => void }
@@ -40,12 +41,8 @@ function LocationStep({ onLocated }: Props) {
 
   return (
     <main className='location-step'>
-      <div className='location-topline'>
-        <ol className='location-steps' aria-label='Field planning steps'>
-          <li aria-current='step'>1. Location</li>
-          <li>2. Fields</li>
-          <li>3. Crops</li>
-        </ol>
+      <div className='step-header location-topline'>
+        <StepNav current='location' />
       </div>
 
       <h2>Find your fields</h2>
