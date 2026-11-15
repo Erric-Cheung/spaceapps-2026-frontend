@@ -94,10 +94,6 @@ or a newer Node version with native TypeScript support.
 # Field imagery preview
 
 The preview below crop history uses the selected field's actual map boundary.
-The slider contains six supplied HLS image URLs and capture dates in
-`FieldImagerySlider.tsx`. Sample mode previews these on the selected boundary
-with their aspect ratio preserved; they are not observations of that field. No separate sample files or `test.json` are required;
-`sampleImagery` enables this self-contained preview.
 
 `FieldImagerySlider` requires a GeoJSON Polygon or MultiPolygon `boundary`.
 Optional props are `fieldName`, `images`, `bbox` (`[west, south, east, north]`),
