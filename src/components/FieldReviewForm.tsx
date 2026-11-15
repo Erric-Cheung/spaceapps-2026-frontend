@@ -164,7 +164,7 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
         <div className='review-confirm-action'>
           {allConfirmed && <p className='review-all-confirmed' role='status'>All fields confirmed.</p>}
           {allConfirmed && onSubmit ? <button type='submit' className='button-primary review-primary'>Get crop rotation suggestions<ArrowRight size={18} aria-hidden='true' /></button> :
-            <button type='button' className='button-primary review-primary' disabled={!canConfirm(input) || input.confirmed} onClick={confirm}><Check size={18} aria-hidden='true' />{input.confirmed ? 'Field confirmed' : confirmedCount === fields.length - 1 ? 'Confirm field' : 'Confirm field and next'}</button>}
+            <button type='button' className='button-primary review-primary' disabled={!canConfirm(input) || input.confirmed} onClick={event => { event.preventDefault(); confirm() }}><Check size={18} aria-hidden='true' />{input.confirmed ? 'Field confirmed' : confirmedCount === fields.length - 1 ? 'Confirm field' : 'Confirm field and next'}</button>}
         </div>
       </div>
     </form>

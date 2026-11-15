@@ -7,5 +7,6 @@ export const crops = [
   'Canola',
   'Potatoes',
   'Alfalfa',
+  'Pasture',
   'Grapes',
 ]

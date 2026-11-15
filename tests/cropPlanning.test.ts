@@ -8,7 +8,10 @@ const field: FieldFeature = { type: 'Feature', properties: { id: 'field-2', sele
 } }
 const answers = [{ fieldId: 'field-2', crop: 'Corn', readyDate: '2028-04-20' }]
 const response = { planner: 'random-placeholder', temporary: true, disclaimer: 'Random example', plans: [
-  { fieldId: 'field-2', currentCrop: 'Corn', years: Array.from({ length: 5 }, (_, i) => ({ year: 2028 + i, crop: 'Soybeans' })) },
+  { fieldId: 'field-2', currentCrop: 'Corn', years: Array.from({ length: 5 }, (_, i) => ({ year: 2028 + i, crop: 'Soybeans' })),
+    alternatives: ['Corn', 'Soybeans', 'Wheat'].map((crop, i) => ({ id: `rotation-${i}`, title: `Rotation ${i}`, summary: 'Example sequence',
+      years: Array.from({ length: 5 }, (_, y) => ({ year: 2028 + y, crop, rationale: 'Demo reasoning' })), benefits: ['Example benefit'], tradeoff: 'Example tradeoff' })),
+  },
 ] }
 
 test('planning preserves field identity, geometry, confirmed answers and the backend response', async t => {
@@ -26,11 +29,26 @@ test('planning preserves field identity, geometry, confirmed answers and the bac
   assert.deepEqual(await fetchCropPlan([field], answers, signal), response)
 })
 
-test('unsupported farmer answers are rejected without substituting another crop', async t => {
-  let calls = 0
-  t.mock.method(globalThis, 'fetch', async () => { calls++; return Response.json({ crops: ['Corn', 'Soybeans'] }) })
-  await assert.rejects(fetchCropPlan([field], [{ ...answers[0], crop: 'Not sure' }], new AbortController().signal), /Field 2.*Not sure.*not supported/)
-  assert.equal(calls, 1)
+test('pasture, unknown and custom farmer answers reach Java without substitution', async t => {
+  let currentAnswer = ''
+  t.mock.method(globalThis, 'fetch', async (url: string, init?: RequestInit) => {
+    if (url === '/api/crops') return Response.json({ crops: ['Corn', 'Soybeans', 'Wheat'] })
+    const request = JSON.parse(init!.body as string)
+    assert.equal(request.fields[0].currentCrop, currentAnswer)
+    return Response.json({ ...response, plans: response.plans.map(plan => ({ ...plan, currentCrop: currentAnswer })) })
+  })
+  for (const crop of ['Pasture', 'Not sure', 'Nothing planted', 'Mixed hay']) {
+    currentAnswer = crop
+    const result = await fetchCropPlan([field], [{ ...answers[0], crop }], new AbortController().signal)
+    assert.equal(result.plans[0].currentCrop, crop)
+  }
+})
+
+test('duplicated random rotations are rejected instead of appearing as different options', async t => {
+  t.mock.method(globalThis, 'fetch', async (url: string) => url === '/api/crops'
+    ? Response.json({ crops: ['Corn'] })
+    : Response.json({ ...response, plans: [{ ...response.plans[0], alternatives: Array(3).fill(response.plans[0].alternatives[0]) }] }))
+  await assert.rejects(fetchCropPlan([field], answers, new AbortController().signal), /three different rotations/)
 })
 
 test('incomplete responses and backend failures do not become displayed plans', async t => {

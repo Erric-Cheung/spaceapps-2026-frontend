@@ -1,6 +1,15 @@
 import type { FieldFeature } from './fields'
 
 export type SubmittedField = { fieldId: string; crop: string; readyDate: string }
+export type PlannedYear = { year: number; crop: string; rationale?: string }
+export type RotationOption = {
+  id: string
+  title: string
+  summary: string
+  years: PlannedYear[]
+  benefits: string[]
+  tradeoff: string
+}
 export type CropPlanResponse = {
   planner: string
   temporary: boolean
@@ -8,7 +17,8 @@ export type CropPlanResponse = {
   plans: {
     fieldId: string
     currentCrop: string
-    years: { year: number; crop: string }[]
+    years: PlannedYear[]
+    alternatives?: RotationOption[]
   }[]
 }
 
@@ -22,9 +32,6 @@ export async function fetchCropPlan(fields: FieldFeature[], answers: SubmittedFi
   const request = answers.map(answer => {
     const field = fields.find(field => field.properties.id === answer.fieldId)
     if (!field) throw new Error('A selected field is missing. Go back and select your fields again.')
-    const supported = catalog.crops.some(crop => (typeof crop === 'string' ? [crop] : [crop.id, crop.name])
-      .some(name => name.toLowerCase() === answer.crop.toLowerCase()))
-    if (!supported) throw new Error(`Field ${field.properties.selectionNumber ?? fields.indexOf(field) + 1}: "${answer.crop}" is not supported by the demo planner. Go back to crops and choose a supported crop.`)
     return { fieldId: answer.fieldId, geometry: field.geometry, currentCrop: answer.crop, readyDate: answer.readyDate, growableCrops }
   })
   const response = await fetch('/api/crop-optimization', {
@@ -41,5 +48,10 @@ export async function fetchCropPlan(fields: FieldFeature[], answers: SubmittedFi
     !result.plans.some(plan => plan.fieldId === answer.fieldId && plan.years?.length === 5))) {
     throw new Error('The backend returned an incomplete plan. Please try again.')
   }
+  if (result.planner === 'random-placeholder' && result.plans.some(plan => {
+    const options = plan.alternatives
+    return options?.length !== 3 || options.some(option => option.years?.length !== 5)
+      || new Set(options.map(option => JSON.stringify(option.years.map(year => year.crop)))).size !== 3
+  })) throw new Error('The demo backend must return three different rotations. Check that the latest Java backend is running, then try again.')
   return result
 }

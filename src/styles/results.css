@@ -35,3 +35,17 @@
     .results-years li + li { border-left: 0; border-top: 1px solid var(--border); }
     .results-actions > button { width: 100%; }
 }
+
+.results-rotations { margin-top: 24px; }
+.results-rotation { padding: 24px 0; border-top: 1px solid var(--border); }
+.results-rotation h4 { margin: 0; font-size: 1.125rem; }
+.results-rotation-summary { margin-top: 8px; color: var(--ink-muted); }
+.results-rotation .results-years { margin-top: 16px; }
+.results-benefits { margin: 20px 0 12px; padding-left: 24px; }
+.results-benefits li + li { margin-top: 8px; }
+.results-tradeoff { color: var(--ink-muted); }
+.results-rationale { margin-top: 12px; }
+.results-rationale summary { min-height: 44px; display: list-item; align-content: center; cursor: pointer; }
+.results-rationale ol { margin: 12px 0 0; padding-left: 24px; }
+.results-rationale li + li { margin-top: 16px; }
+.results-rationale li p { margin-top: 4px; color: var(--ink-muted); }

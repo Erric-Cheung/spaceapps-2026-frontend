@@ -125,8 +125,8 @@ The results page sends confirmed field IDs, their Polygon or MultiPolygon geomet
 current crops and planting dates to Java's `POST /crop-optimization`. It first loads
 `GET /crops` and uses the full catalog as the demo's possible crop choices. This
 assumption is disclosed on the page; it does not establish field suitability.
-Unknown or unsupported current crops produce a message asking the user to return
-to crop confirmation. No replacement crop is invented.
+Pasture, unknown answers, nothing planted and custom crop names are preserved by the random
+demo. The frontend does not require the current crop to belong to the future-crop catalog.
 
 For a local Java backend, create `.env.local` with:
 
@@ -145,7 +145,9 @@ Then run `npm run dev -- --host 127.0.0.1 --port 5175`. The random plan itself n
 no Python calls. The Java project targets JDK 27; local verification used the installed
 JDK 26 with `-Djava.version=26`, without changing the project's configured version.
 
-Results show five calendar years from the Java response, keep crop answers when
+Results show three distinct five-year rotations per field from the Java response. Each has
+a sequence summary, example benefits, tradeoffs and expandable year-by-year explanations.
+These explanations are illustrative demo content, not field analysis. Results keep crop answers when
 returning to the form, and provide retry after a request failure. Random responses
 keep the loading sentence visible for at least four seconds in total; leaving the
 page cancels the request and reveal timer. Returning to results requests a new plan.
@@ -153,7 +155,8 @@ page cancels the request and reveal timer. Returning to results requests a new p
 Browser verification used real local Java responses at 1440 x 900 and 390 x 844.
 The successful planning HTTP call took 9 ms in one warm run; the deliberate loading
 state made the plan visible after 4.36 seconds. An injected HTTP 503 showed the error
-state; retry used the live endpoint and displayed exactly its five returned crops.
+state; retry used the live endpoint and displayed exactly its returned crops. Subsequent verification covered pasture confirmation
+and three distinct alternatives with explanations.
 The mobile document measured 390 px wide, with no horizontal overflow. Screenshots
 are in the parent workspace's `output/playwright/`. The results page reuses the
 existing application tokens in `src/styles/tokens.css`; no new design system or
@@ -161,3 +164,8 @@ licensed assets were introduced.
 
 Run the frontend checks with `npm run build`, `npm run lint` and
 `node --test tests/*.test.ts`.
+
+Pasture regression verification selected Pasture in the actual confirmation form,
+confirmed it without submitting, then requested results from local Java. The
+response kept `currentCrop: Pasture` and displayed three distinct crop sequences
+after 4.37 seconds. Desktop and mobile layouts fit their viewport widths.
