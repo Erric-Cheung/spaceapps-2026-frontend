@@ -1,5 +1,4 @@
-import { useState } from "react";
-import Map from "./components/Map.tsx";
+import { lazy, Suspense, useState } from "react";
 import FieldReviewForm from "./components/FieldReviewForm.tsx";
 import LocationStep from "./components/LocationStep.tsx";
 import SelectedFields from "./components/SelectedFields.tsx";
@@ -9,6 +8,7 @@ import type { GeoLocation } from "./data/geocode";
 import { fetchCropHistory, type CropHistoryResponse } from "./data/cropHistory";
 
 type Step = "location" | "fields" | "form";
+const Map = lazy(() => import("./components/Map.tsx"));
 
 function App() {
   const [step, setStep] = useState<Step>("location");
@@ -43,7 +43,7 @@ function App() {
 
   return (
     <>
-      <header>
+      <header className={step === "location" ? "landing-header" : undefined}>
         <div className="header-brand">
           <h1>Money Stealer</h1>
         </div>
@@ -53,11 +53,13 @@ function App() {
 
       {step !== "location" && location && (
         <main className={`field-workspace${step === "form" ? " field-workspace--form" : ""}`}>
-          <Map
-            key={`${location.lat},${location.lng}`}
-            location={location}
-            onChange={setSelectedFields}
-          />
+          <Suspense fallback={<div className="map-loading" role="status">Opening your field map…</div>}>
+            <Map
+              key={`${location.lat},${location.lng}`}
+              location={location}
+              onChange={setSelectedFields}
+            />
+          </Suspense>
           <aside className="field-panel" aria-label={step === "form" ? "Field details" : "Field selection"}>
             {step === "fields" ? (
               <>

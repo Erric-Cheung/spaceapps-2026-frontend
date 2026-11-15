@@ -4,13 +4,20 @@ import { toLocation, type GeoLocation } from '../data/geocode'
 
 type Props = { onLocated: (location: GeoLocation) => void }
 
+const EXAMPLE_LOCATION: GeoLocation = {
+  lat: 44.58,
+  lng: -79.52,
+  label: 'Example area near Orillia, Ontario',
+}
+
+/** Entry point for locating a farmer's land or exploring the available example area. */
 function LocationStep({ onLocated }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const useMyLocation = () => {
     if (!navigator.geolocation) {
-      setError('Your browser does not support geolocation.')
+      setError('Location is not available in this browser. Search for your address or a nearby town instead.')
       return
     }
     setBusy(true)
@@ -20,28 +27,46 @@ function LocationStep({ onLocated }: Props) {
         setBusy(false)
         onLocated({ lat: pos.coords.latitude, lng: pos.coords.longitude })
       },
-      () => {
+      failure => {
         setBusy(false)
-        setError('Could not get your location. Check permissions and try again.')
+        setError(failure.code === 1
+          ? 'Location access was declined. You can still search for an address or nearby town.'
+          : 'We couldn’t find your location. Try an address or nearby town instead.')
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
     )
   }
 
   return (
-    <section className='location-step'>
-      <h2>Enter your location to get&nbsp;started</h2>
+    <main className='location-step'>
+      <div className='location-topline'>
+        <ol className='location-steps' aria-label='Field planning steps'>
+          <li aria-current='step'>1. Location</li>
+          <li>2. Fields</li>
+          <li>3. Crops</li>
+        </ol>
+      </div>
+
+      <h2>Find your fields</h2>
+      <p className='location-intro'>Search for your address or a nearby town. Then choose your fields on the map.</p>
+      <p className='location-search-hint'>Address or town in Canada</p>
       <AddressSearch
         className='address-search--page'
-        placeholder='City, address, or region'
+        placeholder='For example, Orillia, Ontario'
         buttonLabel='Find fields'
         onPick={place => onLocated(toLocation(place))}
       />
       <button type='button' className='location-geo' onClick={useMyLocation} disabled={busy}>
-        Use my location
+        {busy ? 'Finding your location...' : 'Use my current location'}
       </button>
       {error && <p className='location-error' role='alert'>{error}</p>}
-    </section>
+
+      <div className='location-example'>
+        <button type='button' onClick={() => onLocated(EXAMPLE_LOCATION)}>Explore example fields</button>
+        <p>Try the map near Orillia, Ontario, without entering a location.</p>
+      </div>
+
+    </main>
   )
 }
 
