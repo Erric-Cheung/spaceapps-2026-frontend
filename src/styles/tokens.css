@@ -25,6 +25,11 @@
     --focus: rgba(212, 160, 23, .55);
     --highlight: rgba(212, 160, 23, .18);
 
+    --crop-corn: color-mix(in srgb, #D4A017 65%, var(--paper));
+    --crop-soy: color-mix(in srgb, #9EA67E 85%, var(--paper));
+    --crop-pasture: color-mix(in srgb, #9EA67E 75%, var(--ink));
+    --crop-grain: color-mix(in srgb, var(--brand) 40%, var(--paper));
+
     /* Basic type scale */
     --text-h1: 2rem;
     --text-h2: 1.5rem;

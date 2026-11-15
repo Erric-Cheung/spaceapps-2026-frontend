@@ -27,8 +27,6 @@
 .selection-continue:disabled { opacity: .55; cursor: default; }
 .selection-list-toggle { display: none; }
 .selection-panel button:focus-visible, .field-help summary:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
-.review-field-identity { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--ink-muted); margin-bottom: 8px; }
-.history-retry { min-height: 44px; border: 0; padding: 4px 8px; background: transparent; color: var(--ink); text-decoration: underline; font: inherit; cursor: pointer; }
 
 @media (max-width: 767px) {
     .selection-heading { padding: 14px 20px 8px; }

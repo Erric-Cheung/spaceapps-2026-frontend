@@ -7,6 +7,7 @@ import type { GeoLocation } from "./data/geocode";
 import type { CropHistoryResponse } from "./data/cropHistory";
 import { useCropHistory } from "./data/cropHistoryCache";
 import type { FieldMapHandle } from "./components/Map";
+import type { FieldReviewInput } from "./data/fieldReview";
 
 type Step = "location" | "fields" | "form";
 const Map = lazy(() => import("./components/Map.tsx"));
@@ -16,10 +17,10 @@ function App() {
   const [location, setLocation] = useState<GeoLocation | null>(null);
   const [selectedFields, setSelectedFields] = useState<FieldFeature[]>([]);
   const mapRef = useRef<FieldMapHandle>(null);
+  const [reviewInputs, setReviewInputs] = useState<Record<string, FieldReviewInput>>({});
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const selectedIds = useMemo(() => selectedFields.map(field => field.properties.id), [selectedFields]);
   const { entries, retry } = useCropHistory(selectedIds);
-  const loadingHistory = selectedIds.filter(id => entries[id]?.status === 'loading' || !entries[id]).length;
   const failedHistory = selectedIds.filter(id => entries[id]?.status === 'error').length;
   const historyResults = selectedIds.flatMap(id => entries[id]?.result ? [entries[id].result!] : []);
   const cropHistory: CropHistoryResponse = {
@@ -36,6 +37,7 @@ function App() {
   const handleLocationSelected = (next: GeoLocation) => {
     setLocation(next);
     setSelectedFields([]);
+    setReviewInputs({});
     setStep("fields");
   };
 
@@ -74,8 +76,9 @@ function App() {
               <FieldReviewForm
                 fields={selectedFields}
                 history={cropHistory}
-                loadingHistory={loadingHistory}
-                failedHistory={failedHistory}
+                inputs={reviewInputs}
+                onUpdate={(id, input) => setReviewInputs(previous => ({ ...previous, [id]: input }))}
+                historyEntries={entries}
                 onRetryHistory={retry}
                 onClose={() => setStep("fields")}
               />
