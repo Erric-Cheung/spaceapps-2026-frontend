@@ -175,10 +175,11 @@
         overflow: visible;
     }
     .selection-actions {
-        padding: 10px 20px max(12px, env(safe-area-inset-bottom));
+        padding: 12px 20px max(14px, env(safe-area-inset-bottom));
     }
     .selection-panel {
         height: auto;
         max-height: none;
+        font-size: 1rem;
     }
 }
