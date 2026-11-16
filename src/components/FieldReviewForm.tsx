@@ -7,12 +7,13 @@ import { crops } from '../data/crops'
 import type { HistoryEntry } from '../data/cropHistoryCache'
 import { canConfirm, cropAnswer, EMPTY_REVIEW, OTHER_CROP, NO_CROP, UNKNOWN_CROP, type FieldReviewInput } from '../data/fieldReview'
 import { SAMPLE_SUGGESTION } from '../data/cropHistorySample'
+import { defaultSeasonYear } from '../data/fieldSeason'
 import BackButton from './BackButton'
 import CropHistoryEvidence from './CropHistoryEvidence'
 import FieldOutline from './FieldOutline'
 import StepNav from './StepNav'
 
-const FieldImagerySlider = lazy(() => import('./FieldImagerySlider'))
+const FieldSeason = lazy(() => import('./FieldSeason'))
 
 type Props = {
   fields: FieldFeature[]
@@ -54,6 +55,8 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
   const suggestion = summary?.currentCrop
   const suggestedCrop = suggestion?.crop
   const year = summary?.reviewYear
+  // Satellite pictures follow the season being confirmed, never a season that has not started.
+  const seasonYear = Math.min(year ?? defaultSeasonYear(), defaultSeasonYear())
   const savedInput = inputs[id] ?? EMPTY_REVIEW
   const input = !savedInput.crop && suggestedCrop ? { ...savedInput, crop: suggestedCrop } : savedInput
   const options = [...new Set([...crops, ...[suggestedCrop, input.crop].filter((crop): crop is string => typeof crop === 'string' && crop.length > 0 && !crop.startsWith('__'))])]
@@ -122,8 +125,8 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
             <div className='review-evidence'>
               <h4>What the crop maps show</h4>
               <CropHistoryEvidence history={fieldHistory} loading={historyLoading} failed={historyFailed} onRetry={onRetryHistory} />
-              <Suspense fallback={<div className='imagery-chunk-loading' role='status'><span className='sr-only'>Loading satellite imagery</span><SkeletonBox className='imagery-chunk-box' width='100%' height={300} radius={12} /></div>}>
-                <FieldImagerySlider boundary={field.geometry} fieldId={id} fieldName={`Field ${number}`} showImagery />
+              <Suspense fallback={<div className='imagery-chunk-loading' role='status'><span className='sr-only'>Loading satellite pictures</span><SkeletonBox className='imagery-chunk-box' width='100%' height={300} radius={8} /></div>}>
+                <FieldSeason fieldId={id} fieldName={`Field ${number}`} year={seasonYear} />
               </Suspense>
             </div>
 

@@ -114,32 +114,26 @@ Source metadata: https://www.geoboundaries.org/api/current/gbOpen/.
 
 Run navigation checks with `node --test tests/mapNavigation.test.ts` on Node 22.18+
 or a newer Node version with native TypeScript support.
-# Field imagery preview
+# Field season pictures
 
-The preview below crop history uses the selected field's actual map boundary.
+The crop confirmation step shows the selected field through its latest growing
+season, as NASA HLS (Landsat and Sentinel-2, 30 m) saw it. `FieldSeason` polls
+`GET /api/fields/{fieldId}/season?year=YYYY&pixels=true&since=N` every 1.5 s
+while the acquisition runs. Each poll returns every daily point with its quality
+and greenness, but display pixels only for observations after `since`; the
+component keeps earlier pictures by `sceneId` and sends the last
+`observationCount` as the next `since`. A whole season takes about a minute the
+first time; the first picture usually appears within ten seconds, and pictures
+fill in across the year as they arrive.
 
-`FieldImagerySlider` requires a GeoJSON Polygon or MultiPolygon `boundary`.
-With `showImagery`, it fetches `GET /api/fields/{fieldId}/imagery?dataset=hls&limit=20`
-for the selected field. HLS combines Landsat and Sentinel-2 scenes; the Java API
-samples up to 20 images across the hosted archive years (HLS: 2020 to today),
-then returns scenes passing field-level valid-pixel, cloud and shadow checks.
-It requires at least 90% valid and clear sampled field pixels, after the coarse
-30% whole-scene cloud filter. Some years may have no selected image.
-Without `fieldId`, it posts the boundary to `/api/imagery` instead. The data
-client also supports `dataset: 'sentinel-2'` for native 10 m imagery.
+Pictures are drawn at one block per 30 m square, never smoothed. White stripes
+mark cloud or shadow over the field, and the outline follows the squares counted
+as the field. The timeline places every satellite pass on a true date scale;
+the greenness line joins only clear days and breaks across 20-day gaps. The view
+opens on the greenest day, and sentences describe what was measured without
+diagnosing causes.
 
-The map fits the field with 60 px of space around it. For Planetary Computer
-images, the existing image proxy requests the same scene cropped to the map
-viewport in Web Mercator, filling the panel without changing outline scaling.
-Other supplied images retain their returned `bbox` (`[west, south, east, north]`). Map pan,
-zoom, rotation and keyboard movement are disabled; the date slider remains active. PNG routes returned by Java are prefixed with `/api`
-so both metadata and images use the same proxy. `API_URL` must point to the Java
-API. Loading, empty results, catalogue failures with retry, and individual image
-failures are shown in the preview; changing fields cancels the pending request.
-Optional `images` and `bbox` props allow supplied imagery instead of fetching.
-Basemap tiles still require access to the external provider.
-
-Run imagery API checks with `node --test tests/fieldImagery.test.ts`.
+Run season checks with `node --test tests/fieldSeason.test.ts`.
 
 ## Local Java planning demo
 
