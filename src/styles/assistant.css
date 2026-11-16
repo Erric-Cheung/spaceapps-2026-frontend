@@ -1,0 +1,180 @@
+/* Field assistant: a side sheet on wide screens, full screen on phones. Uses only tokens.css values. */
+.header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.header-ask { flex-shrink: 0; background: transparent; color: var(--brand-green); }
+.header-ask:hover:enabled { background: var(--brand-08); color: var(--brand-green-hover); }
+@media (max-width: 650px) {
+    .header-ask { padding-inline: 14px; }
+    .header-ask-label { display: none; }
+}
+
+.assistant {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: min(480px, 100%);
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    padding: 0 env(safe-area-inset-right, 0px) 0 0;
+    border: 0;
+    border-left: 1px solid var(--border-strong);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 1.0625rem;
+    line-height: 1.5;
+}
+.assistant[open] { display: flex; flex-direction: column; }
+.assistant::backdrop { background: rgba(62, 44, 31, .32); }
+
+.assistant-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 12px 12px 20px;
+    border-bottom: 1px solid var(--border);
+}
+.assistant-header h2 { flex: 1; padding: 0; font-size: 1.25rem; line-height: 1.3; letter-spacing: -.01em; }
+
+.assistant-close,
+.assistant-text-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-size: .9375rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.assistant-text-button { color: var(--brand-green); text-decoration: underline; text-underline-offset: 3px; }
+.assistant-close:hover, .assistant-text-button:hover { background: var(--brand-08); }
+
+.assistant :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.assistant-log:focus-visible { outline-offset: -3px; }
+
+.assistant-log {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 20px 20px 8px;
+}
+.assistant-context { color: var(--ink-muted); font-size: .9375rem; }
+.assistant-undo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 12px; padding: 4px 4px 4px 14px; border-left: 3px solid var(--focus); background: var(--paper-raised); }
+
+.assistant-empty { margin-top: 24px; }
+.assistant-empty > p { font-weight: 600; }
+.assistant-empty ul { list-style: none; margin-top: 10px; }
+.assistant-empty li + li { margin-top: 8px; }
+.assistant-suggestion {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.assistant-suggestion:hover { border-color: var(--brand-40); background: var(--paper-raised); }
+
+.assistant-about { margin-top: 24px; color: var(--ink-muted); font-size: .9375rem; }
+.assistant-about summary { min-height: 44px; align-content: center; color: var(--ink); cursor: pointer; }
+.assistant-about p + p { margin-top: 10px; }
+
+.assistant-messages { list-style: none; }
+.assistant-message { margin-top: 20px; }
+.assistant-message--user {
+    width: fit-content;
+    max-width: 85%;
+    margin-left: auto;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--brand-08);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.assistant-answer { overflow-wrap: anywhere; }
+.assistant-answer > * + * { margin-top: 12px; }
+.assistant-answer h1, .assistant-answer h2, .assistant-answer h3, .assistant-answer h4 { padding: 0; font-size: 1.0625rem; line-height: 1.4; }
+.assistant-answer ul, .assistant-answer ol { padding-left: 24px; }
+.assistant-answer li + li { margin-top: 4px; }
+.assistant-answer a { color: var(--brand-green); text-underline-offset: 3px; }
+.assistant-answer code { padding: 1px 4px; border-radius: 4px; background: var(--brand-08); font-size: .9em; }
+.assistant-answer blockquote { padding-left: 14px; border-left: 3px solid var(--border-strong); color: var(--ink-muted); }
+.assistant-table { overflow-x: auto; }
+.assistant-table table { border-collapse: collapse; font-size: .9375rem; font-variant-numeric: tabular-nums; }
+.assistant-table th, .assistant-table td { padding: 6px 12px 6px 0; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+
+.assistant-lookups { margin-bottom: 10px; color: var(--ink-muted); font-size: .9375rem; }
+.assistant-lookups summary { min-height: 44px; align-content: center; cursor: pointer; }
+.assistant-lookups ul { list-style: none; padding: 4px 0 8px 18px; border-left: 1px solid var(--border); }
+.assistant-lookups li { display: flex; justify-content: space-between; gap: 16px; }
+.assistant-lookups li + li { margin-top: 4px; }
+.assistant-lookup-state { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+.assistant-proposal { margin-top: 16px; padding: 16px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--paper-raised); }
+.assistant-proposal h3 { font-size: 1.0625rem; line-height: 1.4; }
+.assistant-proposal-field { color: var(--ink-muted); font-size: .9375rem; }
+.assistant-proposal > p + p { margin-top: 8px; }
+/* Five years stack as rows: the sheet is too narrow for the five-column layout used on Results. */
+.assistant-years.results-years { grid-template-columns: 1fr; margin-top: 12px; }
+.assistant-years.results-years li { flex-direction: row; align-items: baseline; gap: 20px; padding: 8px 14px; background: var(--surface); }
+.assistant-years.results-years li + li { border-left: 0; border-top: 1px solid var(--border); }
+.assistant-proposal-notes { margin-top: 8px; color: var(--ink-muted); font-size: .9375rem; }
+.assistant-proposal-notes summary { min-height: 44px; align-content: center; color: var(--ink); cursor: pointer; }
+.assistant-proposal-notes ul { padding-left: 20px; }
+.assistant-proposal-notes p { margin-top: 8px; }
+
+.assistant-note { margin-top: 10px; color: var(--ink-muted); font-size: .9375rem; }
+.assistant-error { margin-top: 10px; padding: 12px 14px; border-left: 3px solid var(--error); background: var(--paper-raised); }
+.assistant-error p { color: var(--error); }
+.assistant-error button { margin-top: 10px; }
+
+.assistant-compose {
+    padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--border);
+    background: var(--paper);
+}
+.assistant-activity { margin-bottom: 8px; color: var(--ink-muted); font-size: .9375rem; }
+.assistant-compose-row { display: flex; align-items: flex-end; gap: 8px; }
+.assistant-compose textarea {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    max-height: 30dvh;
+    padding: 11px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    line-height: 1.4;
+    resize: none;
+    field-sizing: content;
+}
+.assistant-compose textarea::placeholder { color: var(--ink-muted); opacity: 1; }
+.assistant-compose textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.assistant-send { min-height: 48px; flex-shrink: 0; }
+
+@media (max-width: 560px) {
+    .assistant { width: 100%; border-left: 0; padding-left: env(safe-area-inset-left, 0px); }
+    .assistant-log { padding-inline: 16px; }
+    .assistant-header { padding-left: 16px; }
+    .assistant-header h2 { font-size: 1.125rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .assistant[open] { animation: assistant-in 160ms ease-out; }
+    @keyframes assistant-in { from { transform: translateX(24px); opacity: 0; } }
+}

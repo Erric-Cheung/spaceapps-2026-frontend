@@ -40,6 +40,28 @@ Run acquisition queue and navigation checks with:
 node --test tests/cropHistoryCache.test.ts tests/mapNavigation.test.ts
 ```
 
+## Field assistant
+
+Ask a question opens the assistant: a side panel on wide screens, full screen on
+phones. It streams answers from the Java API's `POST /chat/stream` and sends what
+is on screen as context: the location, the selected fields as "Field 1", "Field 2"
+and so on, and only crops the farmer confirmed. A line at the top of the panel says
+what the assistant can see. While it works, a status line says which data it is
+checking, and each reply lists its lookups, with any that failed. Rotation plans it
+proposes appear as a five-year list. Nothing is saved; the conversation lasts until
+the page is reloaded, and Start over can be undone.
+
+The panel is a modal dialog, so focus stays inside and Escape closes it. Screen
+readers hear progress and the finished answer once, not each streamed word. Enter
+sends on a keyboard; on touch screens the Send button does.
+
+Places with no address, such as the example area or Use my current location, are
+named after the nearest city on a short Ontario list.
+
+In one local run, the first words of an answer arrived in 3 to 7 seconds. A field
+question that ended with a rotation plan took 53 to 100 seconds, mostly in the
+satellite, weather and planner lookups.
+
 ## Address search
 
 The search box on the map finds addresses, roads and towns in Canada with

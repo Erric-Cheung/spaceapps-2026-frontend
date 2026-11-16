@@ -3,14 +3,17 @@ import { LocateFixed, Map as MapIcon } from 'lucide-react'
 import AddressSearch from './AddressSearch'
 import StepNav from './StepNav'
 import { toLocation, type GeoLocation } from '../data/geocode'
+import { nearestCity } from '../data/nearestCity'
 
 type Props = { onLocated: (location: GeoLocation) => void }
 
-const EXAMPLE_LOCATION: GeoLocation = {
-  lat: 44.58,
-  lng: -79.52,
-  label: 'Example area near Orillia, Ontario',
+/** A point with no address is named after the nearest city, e.g. "Orillia, Ontario". */
+const named = (lat: number, lng: number): GeoLocation => {
+  const city = nearestCity(lat, lng)
+  return { lat, lng, label: city ? `${city}, Ontario` : undefined }
 }
+
+const EXAMPLE_LOCATION = named(44.58, -79.52)
 
 /** Entry point for locating a farmer's land or exploring the available example area. */
 function LocationStep({ onLocated }: Props) {
@@ -27,7 +30,7 @@ function LocationStep({ onLocated }: Props) {
     navigator.geolocation.getCurrentPosition(
       pos => {
         setBusy(false)
-        onLocated({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        onLocated(named(pos.coords.latitude, pos.coords.longitude))
       },
       failure => {
         setBusy(false)
