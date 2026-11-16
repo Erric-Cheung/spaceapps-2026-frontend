@@ -97,7 +97,7 @@ export default function AddressSearch({
       <div className="address-search-row">
         <input
           id={`${listId}-input`} type="search" value={query} placeholder={placeholder}
-          autoComplete="off" role="combobox" aria-expanded={!!showList} aria-controls={listId}
+          autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={places.length > 0 && !!showList} aria-controls={places.length > 0 && showList ? listId : undefined}
           aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
           onChange={e => onType(e.target.value)}
           onFocus={() => setOpen(true)} onBlur={() => setOpen(false)} onKeyDown={onKeyDown}

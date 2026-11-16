@@ -6,7 +6,7 @@ const DATA_REPO = 'https://github.com/insertusernamed/spaceapps-2026-data'
 function AboutStep() {
   return (
     <main className='about-step'>
-      <h2>Planning the next crop</h2>
+      <h2 data-step-title='' tabIndex={-1}>Planning the next crop</h2>
       <p className='about-intro'>
         Crop rotation means changing what you grow in a field from one season to the next,
         instead of planting the same crop every year. A simple example is corn one year,

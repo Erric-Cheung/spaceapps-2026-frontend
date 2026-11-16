@@ -64,14 +64,6 @@
 .address-search-results li[aria-selected="true"] { background: var(--highlight); }
 .address-search-results li span { font-size: var(--text-small); color: var(--ink-muted); }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
 
 .address-search-searching { color: var(--ink-muted); }
 .address-search-results li { min-height: 44px; justify-content: center; }

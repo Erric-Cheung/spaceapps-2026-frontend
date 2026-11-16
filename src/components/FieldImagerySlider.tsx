@@ -130,6 +130,12 @@ export default function FieldImagerySlider({ images: suppliedImages, bbox: suppl
         : { boundary, sourceBounds: bbox, bounds, frame })
       overlay.current?.setAttribute('viewBox', `0 0 ${container.current!.clientWidth} ${container.current!.clientHeight}`)
     }
+    // The map is a picture here: label the canvas as an image and keep it out of the tab order.
+    // Its attribution links stay reachable, so the container itself can't be role="img".
+    const canvas = map.getCanvas()
+    canvas.setAttribute('role', 'img')
+    canvas.setAttribute('aria-label', `${fieldName} location map`)
+    canvas.removeAttribute('tabindex')
     map.on('move', update)
     map.on('resize', update)
     map.on('load', update)
@@ -141,11 +147,13 @@ export default function FieldImagerySlider({ images: suppliedImages, bbox: suppl
     })
     observer.observe(container.current)
     return () => { observer.disconnect(); map.remove() }
-  }, [bbox, boundary, fieldBounds])
+  }, [bbox, boundary, fieldBounds, fieldName])
+
+  const noImages = shouldFetch ? 'No sampled images passed the field quality checks for this period.' : 'No dated images are available for this field.'
 
   return <section className="imagery" aria-label={`${fieldName} satellite imagery`}>
     <div className="imagery-map">
-      <div ref={container} className="imagery-map-canvas" role="img" aria-label={`${fieldName} location map, movement locked`} />
+      <div ref={container} className="imagery-map-canvas" />
       <svg ref={overlay} className="imagery-overlay" aria-hidden="true">
         {/* Crop pixels and outline share the map's geographic extent and projection. */}
         <svg x={crop?.fillsViewport ? 0 : view?.frame.x} y={crop?.fillsViewport ? 0 : view?.frame.y}
@@ -157,10 +165,10 @@ export default function FieldImagerySlider({ images: suppliedImages, bbox: suppl
         <use href={`#${id}-outline`} fill="none" stroke="#58402e" strokeWidth="2" />
 
       </svg>
-      {loading && <div className="imagery-image-status" role="status">Checking historical satellite imagery...</div>}
+      {loading && <div className="imagery-image-status">Checking historical satellite imagery...</div>}
       {failed && <div className="imagery-image-status" role="alert"><span>Satellite imagery could not be loaded.</span><button type="button" className="button-secondary" onClick={() => setRequestAttempt(value => value + 1)}><RotateCcw size={16} aria-hidden="true" />Retry imagery</button></div>}
-      {showImagery && !overlapsField && <div className="imagery-image-status" role="status">The supplied imagery does not cover this field. Imagery for this location is needed.</div>}
-      {canShowImage && scene && overlapsField && imageStatus !== 'ready' && <div className="imagery-image-status" role={imageStatus === 'error' ? 'alert' : 'status'}>{imageStatus === 'loading' ? 'Loading image...' : <><span>Image unavailable from provider.</span><button type="button" className="button-secondary" onClick={() => { setImageResult(null); setAttempt(attempt + 1) }}><RotateCcw size={16} aria-hidden="true" />Retry</button></>}</div>}
+      {showImagery && !overlapsField && <div className="imagery-image-status">The supplied imagery does not cover this field. Imagery for this location is needed.</div>}
+      {canShowImage && scene && overlapsField && imageStatus !== 'ready' && <div className="imagery-image-status" role={imageStatus === 'error' ? 'alert' : undefined}>{imageStatus === 'loading' ? 'Loading image...' : <><span>Image unavailable from provider.</span><button type="button" className="button-secondary" onClick={() => { setImageResult(null); setAttempt(attempt + 1) }}><RotateCcw size={16} aria-hidden="true" />Retry</button></>}</div>}
       {mapError && <p className="imagery-map-error" role="alert">The map could not start. Check that WebGL is enabled in your browser.</p>}
     </div>
     {loading || scene ? <Skeleton data={loading ? null : { scenes, selected, period }} sample={SAMPLE_TIMELINE} label="Loading satellite image dates">
@@ -183,6 +191,8 @@ export default function FieldImagerySlider({ images: suppliedImages, bbox: suppl
           {period && <p className="imagery-note">Clear images sampled across {period.start.slice(0, 4)}–{period.end.slice(0, 4)}. Some years may have no selected image.</p>}
         </>
       }}
-    </Skeleton> : !failed && <p role="status">{shouldFetch ? 'No sampled images passed the field quality checks for this period.' : 'No dated images are available for this field.'}</p>}
+    </Skeleton> : !failed && <p>{noImages}</p>}
+    {/* One persistent region, so screen readers hear loading and empty results. */}
+    <p className="sr-only" role="status">{loading ? 'Checking historical satellite imagery.' : !scene && !failed ? noImages : ''}</p>
   </section>
 }

@@ -65,13 +65,13 @@ function ResultsStep({ fields, answers, mappedCrops, onBack, onStartOver }: Prop
         <StepNav current='results' />
       </div>
       <p className='results-eyebrow'>{answers.length} {answers.length === 1 ? 'field' : 'fields'} confirmed</p>
-      <h2>Compare three five-year rotations</h2>
+      <h2 data-step-title='' tabIndex={-1}>Compare three five-year rotations</h2>
       <p className='results-intro'>
         Each option is the planner's best rotation for your field's soil, climate and crop history.
         The second and third leave out the main crop of the one before, in case you would rather not grow it.
       </p>
 
-      {state.status === 'loading' && <p className='results-progress' role='status'>{loadingText(state.progress, answers.length)}</p>}
+      <p className='results-progress' role='status'>{state.status === 'loading' ? loadingText(state.progress, answers.length) : ''}</p>
       {state.status === 'error' && <div className='results-status'>
         <p role='alert'>{state.message}</p>
         <button type='button' className='button-primary' onClick={() => { setState({ status: 'loading', progress: null }); setAttempt(value => value + 1) }}>Try again</button>

@@ -72,3 +72,4 @@
     .results-compare td:nth-of-type(3)::before { content: "Income over 5 years: "; }
 }
 .results-progress { margin-top: 24px; color: var(--ink-muted); }
+.results-progress:empty { display: none; }

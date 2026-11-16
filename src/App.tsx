@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Info } from "lucide-react";
 import { SkeletonBox } from "skullet/react";
 import AboutStep from "./components/AboutStep.tsx";
@@ -16,6 +16,12 @@ import type { SubmittedField } from "./data/cropPlanning";
 
 type Step = "location" | "fields" | "form" | "results";
 const Map = lazy(() => import("./components/Map.tsx"));
+const STEP_TITLES: Record<Step, string> = {
+  location: "Find your fields",
+  fields: "Choose your fields",
+  form: "Confirm your crops",
+  results: "Compare rotations",
+};
 
 function App() {
   const [step, setStep] = useState<Step>("location");
@@ -26,6 +32,17 @@ function App() {
   const [reviewInputs, setReviewInputs] = useState<Record<string, FieldReviewInput>>({});
   const [submittedFields, setSubmittedFields] = useState<SubmittedField[]>([]);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  // On every change of view, name the page and move focus to the new view's heading,
+  // so keyboard and screen reader users are not left on a control that no longer exists.
+  const shownView = useRef(`${step}|${showAbout}`);
+  useEffect(() => {
+    document.title = `${showAbout ? "About" : STEP_TITLES[step]} · AGI crop rotation planner`;
+    const view = `${step}|${showAbout}`;
+    if (shownView.current === view) return;
+    shownView.current = view;
+    const heading = [...document.querySelectorAll<HTMLElement>("[data-step-title]")].find(el => el.offsetParent !== null);
+    heading?.focus();
+  }, [step, showAbout]);
   const selectedIds = useMemo(() => selectedFields.map(field => field.properties.id), [selectedFields]);
   const { entries, retry } = useCropHistory(selectedIds);
   const failedHistory = selectedIds.filter(id => entries[id]?.status === 'error').length;
@@ -70,10 +87,10 @@ function App() {
         <div className="header-brand">
           <img className="header-icon" src="/logo.png" alt="" width={44} height={44} aria-hidden="true" />
           <span className="header-divider" aria-hidden="true" />
-          <span className="header-copy">
+          <h1 className="header-copy">
             <span className="header-title">AGI</span>
             <span className="header-subtitle">Agricultural General Intelligence</span>
-          </span>
+          </h1>
         </div>
         <button
           type="button"
@@ -113,7 +130,7 @@ function App() {
               onChange={setSelectedFields}
             />
           </Suspense>
-          <aside className="field-panel" aria-label={step === "form" ? "Field details" : "Field selection"}>
+          <section className="field-panel" aria-label={step === "form" ? "Crop confirmation" : "Field selection"}>
             {step === "fields" ? (
               <FieldSelectionPanel
                 fields={selectedFields}
@@ -136,7 +153,7 @@ function App() {
                 onSubmit={answers => { setSubmittedFields(answers); setStep("results"); }}
               />
             )}
-          </aside>
+          </section>
         </main>
         )}
       </div>

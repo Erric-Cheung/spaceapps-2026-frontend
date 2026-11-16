@@ -13,6 +13,31 @@
 
 .fp-root { background: var(--fp-paper); font-family: var(--fp-font); }
 .fp-root .maplibregl-canvas { outline: none; }
+.fp-root .maplibregl-canvas:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
+
+/* Centre marker for keyboard selection, shown only while the map has keyboard focus. */
+.field-map-crosshair {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+.field-map--keyboard .field-map-crosshair { display: block; }
+.field-map-crosshair::before,
+.field-map-crosshair::after {
+  content: '';
+  position: absolute;
+  background: var(--brand);
+  box-shadow: 0 0 0 2px var(--paper);
+  border-radius: 1px;
+}
+.field-map-crosshair::before { top: 0; bottom: 0; left: 50%; width: 3px; transform: translateX(-50%); }
+.field-map-crosshair::after { left: 0; right: 0; top: 50%; height: 3px; transform: translateY(-50%); }
 .fp-box {
   position: absolute;
   border: 1.5px dashed var(--fp-ink);

@@ -45,7 +45,7 @@ function LocationStep({ onLocated }: Props) {
         <StepNav current='location' />
       </div>
 
-      <h2>Find your fields</h2>
+      <h2 data-step-title='' tabIndex={-1}>Find your fields</h2>
       <p className='location-intro'>Search for your address or a nearby town. Then choose your fields on the map.</p>
       <p className='location-search-hint'>Address or town in Canada</p>
       <AddressSearch

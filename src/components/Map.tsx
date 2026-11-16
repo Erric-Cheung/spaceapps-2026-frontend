@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useRef, useState, type ReactNode, type Ref, type RefObject } from 'react'
+import { useEffect, useId, useImperativeHandle, useRef, useState, type ReactNode, type Ref, type RefObject } from 'react'
 import { RotateCcw } from 'lucide-react'
 import maplibregl, { type ExpressionSpecification, type GeoJSONSource } from 'maplibre-gl'
 import type { FeatureCollection, Point } from 'geojson'
@@ -75,6 +75,9 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
   const mapRef = useRef<maplibregl.Map | null>(null)
   const pinRef = useRef<maplibregl.Marker | null>(null)
   const [status, setStatus] = useState<Status>('loading')
+  // Keyboard feedback, read by screen readers. A repeat gets a trailing space so it is announced again.
+  const [keyMessage, setKeyMessage] = useState('')
+  const keyHelpId = useId()
 
   useEffect(() => { onChangeRef.current = onChange; onHoverRef.current = onHoverField })
 
@@ -248,21 +251,55 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
       const f = pick(e.point)
       if (f) toggle(String(f.properties.id))
     })
-    map.on('mousemove', e => {
-      const f = pick(e.point)
-      const id = f ? String(f.properties.id) : null
+    const setHover = (id: string | null) => {
       if (id === hoverId) return
       if (hoverId) state(hoverId, { hover: false })
       hoverId = id
       onHoverRef.current?.(id)
       if (id) state(id, { hover: true })
+    }
+    map.on('mousemove', e => {
+      const f = pick(e.point)
+      const id = f ? String(f.properties.id) : null
+      setHover(id)
       map.getCanvas().style.cursor = id ? 'pointer' : ''
     })
-    map.on('mouseout', () => {
-      if (hoverId) state(hoverId, { hover: false })
-      hoverId = null
-      onHoverRef.current?.(null)
-    })
+    map.on('mouseout', () => setHover(null))
+
+    // Keyboard: arrow keys pan and +/- zoom (MapLibre's own handler). While the map has
+    // keyboard focus, a centre marker shows and Enter or Space toggles the field under it.
+    const mapCanvas = map.getCanvas()
+    mapCanvas.setAttribute('aria-label', 'Field map')
+    mapCanvas.setAttribute('aria-describedby', keyHelpId)
+    const announce = (message: string) => setKeyMessage(previous => previous === message ? `${message} ` : message)
+    const keyboardFocused = () => document.activeElement === mapCanvas && mapCanvas.matches(':focus-visible')
+    const centre = () => new maplibregl.Point(mapCanvas.clientWidth / 2, mapCanvas.clientHeight / 2)
+    const trackCentre = () => {
+      // A class rather than :has(:focus-visible), which Chrome does not reliably restyle on focus.
+      container.parentElement?.classList.toggle('field-map--keyboard', keyboardFocused())
+      if (!keyboardFocused()) return
+      const f = pick(centre())
+      setHover(f ? String(f.properties.id) : null)
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return
+      e.preventDefault()
+      if (map.getZoom() < FIELD_MINZOOM) { announce('Zoom in to see fields.'); return }
+      const f = pick(centre())
+      if (!f) { announce('No field under the centre marker. Use the arrow keys to move the map.'); return }
+      const id = String(f.properties.id)
+      const wasSelected = selected.has(id)
+      toggle(id)
+      announce(wasSelected ? 'Field removed.' : `Field ${selected.get(id)?.properties.selectionNumber ?? ''} selected.`)
+    }
+    const onBlur = () => {
+      container.parentElement?.classList.remove('field-map--keyboard')
+      setHover(null)
+    }
+    mapCanvas.addEventListener('keydown', onKeyDown)
+    mapCanvas.addEventListener('focus', trackCentre)
+    mapCanvas.addEventListener('blur', onBlur)
+    map.on('idle', trackCentre)
 
     // Shift-drag: select every field inside the box.
     const canvas = map.getCanvasContainer()
@@ -306,14 +343,19 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
       retryRef.current = () => {}
       controls.current = { removeField: () => {}, focusField: () => {}, highlightField: () => {} }
       canvas.removeEventListener('mousedown', onMouseDown)
+      mapCanvas.removeEventListener('keydown', onKeyDown)
+      mapCanvas.removeEventListener('focus', trackCentre)
+      mapCanvas.removeEventListener('blur', onBlur)
       resizeObserver.disconnect()
       mapRef.current = null
       pinRef.current = null
       map.remove()
     }
-  }, [location])
+  }, [location, keyHelpId])
 
-  const goTo = (place: Place) => { if (mapRef.current) showPlace(mapRef.current, place, pinRef, 1200) }
+  const goTo = (place: Place) => {
+    if (mapRef.current) showPlace(mapRef.current, place, pinRef, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1200)
+  }
   const mapCenter = (): [number, number] => {
     const c = mapRef.current?.getCenter()
     return c ? [c.lng, c.lat] : START.center
@@ -322,6 +364,9 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
   return (
     <section className="field-map" aria-label="Field selection map">
       <div ref={ref} className="field-map-canvas fp-root" />
+      <div className="field-map-crosshair" aria-hidden="true" />
+      <p id={keyHelpId} className="sr-only">Use the arrow keys to move the map and plus or minus to zoom. Press Enter to select or remove the field under the centre marker.</p>
+      <p className="sr-only" role="status">{keyMessage}</p>
       <AddressSearch near={mapCenter} onPick={goTo} initialQuery={location?.label} />
       {children}
       {status === 'loading' && <div className="field-map-progress" aria-hidden="true" />}

@@ -29,11 +29,11 @@ function FieldSelectionPanel({ fields, highlightedId, onContinue, onLocate, onRe
           <BackButton label='Back to location' onClick={onBack} />
           <StepNav current='fields' />
         </div>
-        <h2>Choose your fields</h2>
+        <h2 data-step-title='' tabIndex={-1}>Choose your fields</h2>
         <p>Select a field on the map. Select it again to remove it.</p>
       </div>
 
-      <div className='selection-summary' aria-live='polite' aria-atomic='true'>
+      <div className='selection-summary' id='selection-summary' aria-live='polite' aria-atomic='true'>
         <strong>{count === 0 ? 'No fields selected' : `${count} field${count === 1 ? '' : 's'} selected`}</strong>
         {count > 0 && <span>{knownAreas.length === 0 ? 'Area unavailable' : `About ${totalAcres.toLocaleString(undefined, { maximumFractionDigits: 1 })} acres${knownAreas.length < count ? ' (known areas)' : ' in total'}`}</span>}
       </div>
@@ -52,12 +52,13 @@ function FieldSelectionPanel({ fields, highlightedId, onContinue, onLocate, onRe
           <summary>More ways to select</summary>
           <p>Drag to move the map. Zoom in to see field outlines.</p>
           <p>With a mouse, hold Shift and drag a box to select several fields at once.</p>
+          <p>With a keyboard, move to the map, use the arrow keys to move it and plus or minus to zoom, then press Enter to select the field under the centre marker.</p>
           <p>Outlines are estimated field boundaries, not property lines.</p>
         </details>
       </div>
 
       <div className='selection-actions'>
-        <button type='button' className='button-primary selection-continue' disabled={count === 0} onClick={onContinue}>
+        <button type='button' className='button-primary selection-continue' disabled={count === 0} aria-describedby={count === 0 ? 'selection-summary' : undefined} onClick={onContinue}>
           Continue to crop confirmation
           <ArrowRight size={18} aria-hidden='true' />
         </button>

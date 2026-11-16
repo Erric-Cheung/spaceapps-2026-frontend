@@ -69,6 +69,24 @@ header {
 .header-copy {
     display: flex;
     flex-direction: column;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+/* Step headings receive focus on navigation; the focus itself is the cue, not an outline. */
+[data-step-title]:focus { outline: none; }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 .header-title {
