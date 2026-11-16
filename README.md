@@ -1,187 +1,159 @@
-# SpaceApps frontend
+# AGI: crop rotation planning from NASA data
 
-React, TypeScript, Vite, MapLibre GL, and PMTiles. A map of Ontario where you click
-fields to select them (shift-drag selects a box). Fields load from the SpaceApps API
-for the visible area once you zoom in to level 12.
+AGI (Agricultural General Intelligence) helps a farmer plan the next five years of
+crops for their own fields. You find your farm on a map, pick your fields, check what
+satellites say grew there, and get three rotations to compare, each explained year by
+year. A built-in assistant answers questions about the fields using the same data.
 
-## Run locally
+We built it for the NASA Space Apps Challenge 2026, as the team Green Alien House
+Party. The challenge asked how NASA data could help farmers protect soil health while
+choosing what to grow. Our answer starts from the individual field, not the region:
+every number the app shows is measured for the outline the farmer selected.
+
+Try it at <https://www.agi-spaceapps.earth>.
+
+![Crop review: a field's 2026 season seen by Landsat and Sentinel-2, with a greenness timeline](docs/screenshots/crop-review.png)
+
+## How it works for a farmer
+
+1. **Location.** Search an address or town, or use your current location. The map
+   opens on your area.
+2. **Fields.** Tap your fields on the map, or shift-drag a box to select several. Outlines
+   come from a satellite-derived field map, so there is nothing to draw.
+3. **Crops.** For each field, the app shows what the crop maps recorded in each of the
+   last five years and suggests this season's crop. Next to it, the field's latest
+   growing season plays back as NASA saw it: one picture for every clear satellite
+   pass, and a greenness line from planting to harvest. The farmer confirms or corrects
+   the crop and gives a date when the field is free to plant. Their answer always
+   overrides the map.
+4. **Results.** Three five-year rotations per field: the best match, then the best
+   without its main crop, then without the next one, in case the farmer would rather
+   not grow it. Each is compared on soil health, how well the crops suit this field's
+   climate and soil, and estimated income, with the reason for every crop in every year.
+
+"Ask a question" opens an assistant that knows which fields are on screen and what
+the farmer confirmed. It looks things up rather than guessing: soil, weather, drought,
+crop calendars, market prices, and the same planner, and it lists every lookup it made.
+
+![Results: three five-year rotations for one field, compared and explained](docs/screenshots/results.png)
+
+## What we built
+
+The project is three repositories that deploy together:
+
+| Repository | Language | What it does |
+| --- | --- | --- |
+| [spaceapps-2026-frontend](https://github.com/Erric-Cheung/spaceapps-2026-frontend) (this one) | React, TypeScript | The four-step app, the map, the season playback and the assistant panel |
+| [SpaceApps2026-Backend](https://github.com/chrisbarbati/SpaceApps2026-Backend) | Java, Spring Boot | The rotation planner, crop history interpretation, season quality rules and the AI assistant with its tools |
+| [spaceapps-2026-data](https://github.com/insertusernamed/spaceapps-2026-data) | Python, FastAPI | Field outlines and every satellite, weather and soil lookup, cut to each field's outline |
+
+During the hackathon we:
+
+- **Indexed 353,809 predicted field outlines across Ontario** from Fields of the World,
+  so any field in the province can be selected by tapping it. Fields load for the
+  visible map area as you zoom in.
+- **Read each field's crop history** from Agriculture and Agri-Food Canada's Annual
+  Crop Inventory (Ontario from 2011) and the USDA Cropland Data Layer (from 2008), as
+  the share of the field each crop covered, year by year.
+- **Showed the field's season at the pixel level.** The data service reads NASA's
+  Harmonized Landsat and Sentinel-2 (HLS) scenes for just the field and a margin
+  around it, cloud mask first, and streams pictures as they are ready. A full season
+  of about 130 satellite passes arrives in about a minute the first time, with the
+  first picture after about ten seconds, and in about five seconds after that. The page
+  draws every 30 m square as measured, stripes the clouds, and opens on the greenest
+  day.
+- **Built a planner** that finds the highest-scoring five-year sequence for each field,
+  scoring each year on soil health (breaking pest and disease cycles, nitrogen, residue and
+  ground cover), on how reliably the crop has suited the field's own climate record and
+  soil, and on income.
+- **Built an assistant** on Spring AI with 23 tools that call the same
+  services the app uses, streams its answers, falls back to another model if one fails,
+  and can propose a rotation for the farmer to accept or reject.
+- **Kept it usable for anyone.** Plain words, 44 px touch targets, keyboard selection of
+  map fields, screen reader announcements, and layouts checked in a real browser at
+  desktop and phone sizes.
+
+## The data behind it
+
+| Source | What we use it for |
+| --- | --- |
+| NASA HLS v2.0 (Landsat 8/9 and Sentinel-2, 30 m) | Season pictures and field greenness, every few days |
+| NASA POWER | Daily weather and the climate record: frost dates, heat, rainfall, water balance |
+| NASA MODIS | Up to 25 years of vegetation history at 16-day steps |
+| NASA GRACE and GRACE-FO | Groundwater and soil moisture drought indicators |
+| NASA SMAP | Soil moisture layer in the data API |
+| NASA SRTM | Elevation, slope and erosion rating |
+| AAFC Annual Crop Inventory, USDA Cropland Data Layer | What grew in each field each year |
+| Fields of the World (CC BY 4.0) | Field outlines |
+| SoilGrids, AAFC Soil Landscapes of Canada | Soil texture, pH, organic carbon, drainage and land capability |
+| GGCMI crop calendar, FAO ECOCROP | Planting and maturity dates, and each crop's tolerated conditions |
+| Environment and Climate Change Canada, Statistics Canada | Seasonal outlook, provincial yields and prices |
+| OpenStreetMap through Photon and OpenFreeMap | Address search and the basemap |
+
+## What it cannot tell you
+
+- Field outlines are predictions from satellite imagery. They are not property lines,
+  and one outline can cover two fields.
+- Crop maps are classifications and can be wrong for any year, especially at field
+  edges. That is why the farmer confirms every crop.
+- Greenness measures green leaf. It cannot tell a dry spell from a harvest, or a cover
+  crop from weeds, and clouds leave gaps of weeks. The app shows those gaps instead of
+  filling them.
+- Some planner inputs are estimates we chose to be plausible for southern Ontario, not
+  sourced figures: each crop's nitrogen balance, residue, disease susceptibility and net
+  margin. The results page says which numbers these are. The plans are a starting
+  point for a conversation with an agronomist, not a recommendation.
+
+## How we used AI
+
+We built this project with AI-driven development, using Claude (Anthropic) and Codex
+(OpenAI) as coding assistants. They did not write the project on their own, but they
+sped up our work considerably. The team chose the problem, the approach, the data
+sources and the design, directed the assistants, and reviewed and tested their changes
+before merging them.
+
+In this repository, the assistants wrote and revised much of the React and TypeScript
+code, including the season playback on the Crops step, ran tests and browser checks,
+and drafted documentation, including this README. The backend and data repositories
+were built the same way.
+
+The app's icon (`public/logo.png`, used as the favicon and in the header) is
+AI-generated. The screenshots in this README are of the running app.
+
+The app itself also uses a language model: "Ask a question" sends the farmer's
+question, and what is on screen, to an OpenAI-compatible model, and its answers are
+generated text. It looks facts up with the app's own data tools and lists every lookup
+it made. The rotation plans and every number on the Crops and Results pages are
+calculated by the planner and data services, not generated.
+
+## Running it yourself
+
+You need Node 22.18 or newer and the Java API running somewhere (see the backend
+repository; it in turn needs the data service).
 
 ```sh
-cp .env.example .env     # API_URL: the SpaceApps Java API; VITE_GEOCODER_URL: address search
+cp .env.example .env     # set API_URL to the Java API
 npm install
 npm run dev
 ```
 
-The API sends no CORS headers, so the browser calls `/api/*` and Vite forwards it
-to `API_URL`. The map uses `GET /fields?bbox=...`, following `nextCursor`.
-
-## Selecting fields
-
-Selected fields appear with a north-up outline and approximate acreage. Select a
-row to locate its field on the map, or use Remove to deselect it. Field numbers
-follow selection order and close any gaps when a field is removed, in both the
-list and map. On phones, Show field list expands the selection panel.
-
-Crop history starts loading on selection, with at most two requests in flight.
-Results are reused for the session. Continue opens crop confirmation immediately;
-missing or failed history never prevents manual entry, and failed requests can be
-retried. History suggests a crop when a field has no answer yet, but never replaces an answer
-the farmer has entered.
-
-Local browser verification at 1440 x 900 and 390 x 844 checked selection, removal,
-field location, and consecutive numbering. With history deliberately delayed, opening
-crop confirmation took 27 ms in one local run; this measures the screen transition,
-not provider latency. A simulated provider failure and successful real-data retry
-preserved the crop and planting date entered while waiting.
-
-Run acquisition queue and navigation checks with:
-
-```sh
-node --test tests/cropHistoryCache.test.ts tests/mapNavigation.test.ts
-```
-
-## Field assistant
-
-Ask a question opens the assistant: a side panel on wide screens, full screen on
-phones. It streams answers from the Java API's `POST /chat/stream` and sends what
-is on screen as context: the location, the selected fields as "Field 1", "Field 2"
-and so on, and only crops the farmer confirmed. A line at the top of the panel says
-what the assistant can see. While it works, a status line says which data it is
-checking, and each reply lists its lookups, with any that failed. Rotation plans it
-proposes appear as a five-year list. Nothing is saved; the conversation lasts until
-the page is reloaded, and Start over can be undone.
-
-The panel is a modal dialog, so focus stays inside and Escape closes it. Screen
-readers hear progress and the finished answer once, not each streamed word. Enter
-sends on a keyboard; on touch screens the Send button does.
-
-Places with no address, such as the example area or Use my current location, are
-named after the nearest city on a short Ontario list.
-
-In one local run, the first words of an answer arrived in 3 to 7 seconds. A field
-question that ended with a rotation plan took 53 to 100 seconds, mostly in the
-satellite, weather and planner lookups.
-
-## Address search
-
-The search box on the map finds addresses, roads and towns in Canada with
-[Photon](https://photon.komoot.io) (OpenStreetMap data, no API key), set by
-`VITE_GEOCODER_URL`. Addresses drop a pin at street level; towns zoom in far
-enough for fields to load. Rural house numbers missing from OpenStreetMap fall
-back to the road.
-
-## Basemap
-
-Vector tiles and fonts come from [OpenFreeMap](https://openfreemap.org) (free, no API
-key, worldwide), styled in `src/basemap.ts` with a quiet paper palette. Nothing to
-download; the browser fetches only the visible tiles. Map data © OpenStreetMap
-contributors, OpenMapTiles.
-
-## Production hosting
-
-```sh
-npm run build
-```
-
-Serve `dist/` and configure the host to forward `/api/*` to the data API,
-stripping `/api` from the upstream path. The Vite development proxy is not part
-of the production build. `npm run preview` does not configure this API routing.
-
-## Checks
+The browser calls `/api/*` and the Vite dev server forwards it to `API_URL`. Checks:
 
 ```sh
 npm run build
 npm run lint
+node --test tests/*.test.ts
 ```
 
-## Map navigation
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) explains how each part of the frontend
+works: field selection and crop history loading, the assistant panel, the season
+playback's polling, map navigation limits, and running a local planner.
 
-Camera movement stays within a padded outline of the imported Canada/US/Mexico
-regions, including Alaska and Hawaii. The navigation envelope follows country
-coasts rather than individual field polygons, leaving room for coastal farms,
-islands, lakes and gaps between fields. Its 150 km buffer in Web Mercator gives
-roughly 40–150 km of actual offshore room depending on latitude. Zooming out can
-still show surrounding ocean; the camera centre cannot wander into the deep ocean
-or other continents. Mouse, touch, keyboard and search-driven camera changes use
-the same constraint.
+## Team
 
-`src/data/mapCoverage.ts` is a simplified navigation envelope generated from the
-same geoBoundaries country masks and geographic tiles used by the data importer.
-It is a navigation aid, not a claim that every location contains a detected field.
-Attribution: geoBoundaries; Canada: OpenStreetMap/Wambacher (ODbL 1.0);
-US: US Census Bureau (public domain); Mexico: geoBoundaries/World Bank (CC-BY-4.0).
-Source metadata: https://www.geoboundaries.org/api/current/gbOpen/.
+Christian Barbati, Eric Cheung, Jenna Deamer and insertusernamed, as Green Alien House
+Party.
 
-Run navigation checks with `node --test tests/mapNavigation.test.ts` on Node 22.18+
-or a newer Node version with native TypeScript support.
-# Field season pictures
-
-The crop confirmation step shows the selected field through its latest growing
-season, as NASA HLS (Landsat and Sentinel-2, 30 m) saw it. `FieldSeason` polls
-`GET /api/fields/{fieldId}/season?year=YYYY&pixels=true&since=N` every 1.5 s
-while the acquisition runs. Each poll returns every daily point with its quality
-and greenness, but display pixels only for observations after `since`; the
-component keeps earlier pictures by `sceneId` and sends the last
-`observationCount` as the next `since`. A whole season takes about a minute the
-first time; the first picture usually appears within ten seconds, and pictures
-fill in across the year as they arrive.
-
-Pictures are drawn at one block per 30 m square, never smoothed. White stripes
-mark cloud or shadow over the field, and the outline follows the squares counted
-as the field. The timeline places every satellite pass on a true date scale;
-the greenness line joins only clear days and breaks across 20-day gaps. The view
-opens on the greenest day, and sentences describe what was measured without
-diagnosing causes.
-
-Run season checks with `node --test tests/fieldSeason.test.ts`.
-
-## Local Java planning demo
-
-The results page sends confirmed field IDs, their Polygon or MultiPolygon geometry,
-current crops and planting dates to Java's `POST /crop-optimization`. It first loads
-`GET /crops` and uses the full catalog as the demo's possible crop choices. This
-assumption is disclosed on the page; it does not establish field suitability.
-Pasture, unknown answers, nothing planted and custom crop names are preserved by the random
-demo. The frontend does not require the current crop to belong to the future-crop catalog.
-
-For a local Java backend, create `.env.local` with:
-
-```dotenv
-API_URL=http://127.0.0.1:8094
-```
-
-Start Java from `../SpaceApps2026-Backend` with the random planner explicitly selected:
-
-```sh
-./mvnw spring-boot:run -Dspring-boot.run.arguments='--server.port=8094 --crop.planner.strategy=random --data.backend.url=http://127.0.0.1:8091'
-```
-
-This assumes the Python data service is running on port 8091 for fields and history.
-Then run `npm run dev -- --host 127.0.0.1 --port 5175`. The random plan itself needs
-no Python calls. The Java project targets JDK 27; local verification used the installed
-JDK 26 with `-Djava.version=26`, without changing the project's configured version.
-
-Results show three distinct five-year rotations per field from the Java response. Each has
-a sequence summary, example benefits, tradeoffs and expandable year-by-year explanations.
-These explanations are illustrative demo content, not field analysis. Results keep crop answers when
-returning to the form, and provide retry after a request failure. Random responses
-keep the loading sentence visible for at least four seconds in total; leaving the
-page cancels the request and reveal timer. Returning to results requests a new plan.
-
-Browser verification used real local Java responses at 1440 x 900 and 390 x 844.
-The successful planning HTTP call took 9 ms in one warm run; the deliberate loading
-state made the plan visible after 4.36 seconds. An injected HTTP 503 showed the error
-state; retry used the live endpoint and displayed exactly its returned crops. Subsequent verification covered pasture confirmation
-and three distinct alternatives with explanations.
-The mobile document measured 390 px wide, with no horizontal overflow. Screenshots
-are in the parent workspace's `output/playwright/`. The results page reuses the
-existing application tokens in `src/styles/tokens.css`; no new design system or
-licensed assets were introduced.
-
-Run the frontend checks with `npm run build`, `npm run lint` and
-`node --test tests/*.test.ts`.
-
-Pasture regression verification selected Pasture in the actual confirmation form,
-confirmed it without submitting, then requested results from local Java. The
-response kept `currentCrop: Pasture` and displayed three distinct crop sequences
-after 4.37 seconds. Desktop and mobile layouts fit their viewport widths.
+Map data © OpenStreetMap contributors, OpenMapTiles. Field outlines: Fields of the
+World, Global 2nd Edition (CC BY 4.0). Satellite data courtesy of NASA, USGS, ESA
+Copernicus, Agriculture and Agri-Food Canada and USDA NASS.
