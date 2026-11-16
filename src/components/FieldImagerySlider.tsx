@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
 import maplibregl from 'maplibre-gl'
+import { Skeleton } from 'skullet/react'
 import type { Polygon, MultiPolygon } from 'geojson'
 import { basemapStyle } from '../lib/basemap'
 import { theme } from '../lib/theme'
@@ -21,6 +22,18 @@ type Props = {
 }
 
 const emptyImages: FieldScene[] = []
+
+type Timeline = { scenes: FieldScene[]; selected: number; period?: { start: string; end: string } }
+
+/** Layout-only stand-in for the date controls: twenty sampled scenes across five years. Never shown as text. */
+const SAMPLE_TIMELINE: Timeline = {
+  scenes: Array.from({ length: 20 }, (_, i) => ({
+    sceneId: `sample-${i}`, datetime: `${2021 + Math.floor(i / 4)}-0${5 + (i % 4)}-14T00:00:00Z`,
+    platform: 'sentinel-2b', imageUrl: '', sceneCloudCoverPct: 12,
+  })),
+  selected: 19,
+  period: { start: '2021-05-01', end: '2025-09-30' },
+}
 
 const date = (value: string) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 const satellite = (value: string) => value.replace('sentinel-', 'Sentinel-').replace('landsat-', 'Landsat ')
@@ -148,21 +161,26 @@ export default function FieldImagerySlider({ images: suppliedImages, bbox: suppl
       {canShowImage && scene && overlapsField && imageStatus !== 'ready' && <div className="imagery-image-status" role={imageStatus === 'error' ? 'alert' : 'status'}>{imageStatus === 'loading' ? 'Loading image...' : <><span>Image unavailable from provider.</span><button type="button" className="button-secondary" onClick={() => { setImageResult(null); setAttempt(attempt + 1) }}><RotateCcw size={16} aria-hidden="true" />Retry</button></>}</div>}
       {mapError && <p className="imagery-map-error" role="alert">The map could not start. Check that WebGL is enabled in your browser.</p>}
     </div>
-    {scene ? <>
-      <div className="imagery-details" aria-live="polite">
-        <strong>{date(scene.datetime)}</strong>
-        <span>{satellite(scene.platform)}{scene.sceneCloudCoverPct != null && ` · ${scene.sceneCloudCoverPct}% scene cloud cover`}</span>
-      </div>
-      <div className="imagery-controls">
-        <button type="button" className="button-secondary" aria-label="Previous image" disabled={selected <= 0} onClick={() => setIndex(selected - 1)}><ChevronLeft size={18} aria-hidden="true" /></button>
-        <div className="imagery-track">
-          <label htmlFor={`${id}-slider`}>Date <span>{selected + 1} / {scenes.length}</span></label>
-          <input id={`${id}-slider`} type="range" min="0" max={Math.max(0, scenes.length - 1)} step="1" value={selected} disabled={scenes.length < 2} aria-valuetext={`${date(scene.datetime)}, ${satellite(scene.platform)}`} onChange={event => setIndex(Number(event.target.value))} />
-          <div className="imagery-range"><span>{date(scenes[0].datetime)}</span><span>{date(scenes[scenes.length - 1].datetime)}</span></div>
-        </div>
-        <button type="button" className="button-secondary" aria-label="Next image" disabled={selected >= scenes.length - 1} onClick={() => setIndex(selected + 1)}><ChevronRight size={18} aria-hidden="true" /></button>
-      </div>
-      {period && <p className="imagery-note">Clear images sampled across {period.start.slice(0, 4)}–{period.end.slice(0, 4)}. Some years may have no selected image.</p>}
-    </> : !loading && !failed && <p role="status">{shouldFetch ? 'No sampled images passed the field quality checks for this period.' : 'No dated images are available for this field.'}</p>}
+    {loading || scene ? <Skeleton data={loading ? null : { scenes, selected, period }} sample={SAMPLE_TIMELINE} label="Loading satellite image dates">
+      {({ scenes, selected, period }: Timeline) => {
+        const scene = scenes[selected]
+        return <>
+          <div className="imagery-details" aria-live="polite">
+            <strong>{date(scene.datetime)}</strong>
+            <span>{satellite(scene.platform)}{scene.sceneCloudCoverPct != null && ` · ${scene.sceneCloudCoverPct}% scene cloud cover`}</span>
+          </div>
+          <div className="imagery-controls">
+            <button type="button" className="button-secondary" aria-label="Previous image" disabled={selected <= 0} onClick={() => setIndex(selected - 1)}><ChevronLeft size={18} aria-hidden="true" /></button>
+            <div className="imagery-track">
+              <label htmlFor={`${id}-slider`}>Date <span>{selected + 1} / {scenes.length}</span></label>
+              <input id={`${id}-slider`} type="range" min="0" max={Math.max(0, scenes.length - 1)} step="1" value={selected} disabled={scenes.length < 2} aria-valuetext={`${date(scene.datetime)}, ${satellite(scene.platform)}`} onChange={event => setIndex(Number(event.target.value))} />
+              <div className="imagery-range"><span>{date(scenes[0].datetime)}</span><span>{date(scenes[scenes.length - 1].datetime)}</span></div>
+            </div>
+            <button type="button" className="button-secondary" aria-label="Next image" disabled={selected >= scenes.length - 1} onClick={() => setIndex(selected + 1)}><ChevronRight size={18} aria-hidden="true" /></button>
+          </div>
+          {period && <p className="imagery-note">Clear images sampled across {period.start.slice(0, 4)}–{period.end.slice(0, 4)}. Some years may have no selected image.</p>}
+        </>
+      }}
+    </Skeleton> : !failed && <p role="status">{shouldFetch ? 'No sampled images passed the field quality checks for this period.' : 'No dated images are available for this field.'}</p>}
   </section>
 }

@@ -24,6 +24,7 @@ export default function AddressSearch({
   const [active, setActive] = useState(-1)
   const [open, setOpen] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [searching, setSearching] = useState(false)
   const request = useRef<AbortController | null>(null)
   const nearRef = useRef(near)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -34,6 +35,7 @@ export default function AddressSearch({
     request.current?.abort()
     const controller = new AbortController()
     request.current = controller
+    setSearching(true)
     try {
       const found = await searchPlaces(text, nearRef.current?.(), controller.signal)
       setPlaces(found)
@@ -43,6 +45,8 @@ export default function AddressSearch({
     } catch {
       if (!controller.signal.aborted) setMessage('Search isn’t working right now. Try again in a moment.')
       return []
+    } finally {
+      if (request.current === controller) setSearching(false)
     }
   }
 
@@ -51,7 +55,7 @@ export default function AddressSearch({
     setOpen(true)
     clearTimeout(timer.current)
     const text = value.trim()
-    if (text.length < 3) { request.current?.abort(); setPlaces([]); setMessage(null); return }
+    if (text.length < 3) { request.current?.abort(); setPlaces([]); setMessage(null); setSearching(false); return }
     timer.current = setTimeout(() => { void search(text) }, 250)
   }
 
@@ -60,6 +64,7 @@ export default function AddressSearch({
   const pick = (place: Place) => {
     clearTimeout(timer.current)
     request.current?.abort()
+    setSearching(false)
     setQuery(placeLabel(place))
     setOpen(false)
     setMessage(null)
@@ -83,7 +88,8 @@ export default function AddressSearch({
     else if (e.key === 'Escape') setOpen(false)
   }
 
-  const showList = open && (places.length > 0 || message)
+  const showList = open && (places.length > 0 || !!message || searching)
+  const announcement = searching ? 'Searching' : message ?? (places.length ? `${places.length} ${places.length === 1 ? 'match' : 'matches'}. Use the arrow keys to choose one.` : '')
 
   return (
     <form className={`address-search ${className}`.trim()} role="search" onSubmit={submit}>
@@ -98,9 +104,11 @@ export default function AddressSearch({
         />
         <button type="submit" className="button-primary"><Search size={18} aria-hidden="true" />{buttonLabel}</button>
       </div>
+      <p className="sr-only" role="status">{open ? announcement : ''}</p>
       {showList && (
-        <div className="address-search-results">
-          {message && <p role="status">{message}</p>}
+        <div className="address-search-results" aria-busy={searching || undefined}>
+          {searching && !places.length && <p className="address-search-searching">Searching…</p>}
+          {message && !searching && <p>{message}</p>}
           {places.length > 0 && (
             <ul id={listId} role="listbox" aria-label="Matching places">
               {places.map((p, i) => (

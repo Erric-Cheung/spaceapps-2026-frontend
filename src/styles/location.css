@@ -52,7 +52,8 @@
     outline: 3px solid var(--brand);
     outline-offset: 4px;
 }
-.map-loading { flex: 1; padding: 40px; background: var(--paper); color: var(--ink-muted); }
+.map-loading { display: flex; flex-direction: column; background: var(--paper); }
+.map-loading-box { display: block; flex: 1; }
 
 @media (max-width: 650px) {
     .landing-header { padding: 18px 24px; }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Skeleton, SkulletProvider } from 'skullet/react'
+import { Skeleton } from 'skullet/react'
 import { MapPinned } from 'lucide-react'
 import type { FieldFeature } from '../data/fields'
 import { fetchCropPlan, type CropPlanResult, type PlanProgress, type RotationChoice, type SubmittedField } from '../data/cropPlanning'
@@ -77,11 +77,9 @@ function ResultsStep({ fields, answers, mappedCrops, onBack, onStartOver }: Prop
         <button type='button' className='button-primary' onClick={() => { setState({ status: 'loading', progress: null }); setAttempt(value => value + 1) }}>Try again</button>
       </div>}
 
-      {state.status !== 'error' && <SkulletProvider theme={SKULLET_THEME} mode='light'>
-        <Skeleton data={result} sample={sample} id={`results-${answers.length}`} label='Loading rotation options'>
-          {result => <ResultsBody result={result} fields={fields} answers={answers} />}
-        </Skeleton>
-      </SkulletProvider>}
+      {state.status !== 'error' && <Skeleton data={result} sample={sample} id={`results-${answers.length}`} label='Loading rotation options'>
+        {result => <ResultsBody result={result} fields={fields} answers={answers} />}
+      </Skeleton>}
       <div className='results-actions'>
         <button type='button' className='button-secondary' onClick={onStartOver}>
           <MapPinned size={18} aria-hidden='true' />Plan another location
@@ -170,15 +168,6 @@ function ResultsBody({ result, fields, answers }: { result: CropPlanResult; fiel
       </>
   )
 }
-
-/** Skeleton colours from the app's palette: brand ink at 8% on paper, with a paper-coloured shimmer. */
-const SKULLET_THEME = {
-  light: { base: 'rgb(88 64 46 / 0.08)', highlight: 'rgb(247 246 242 / 0.7)' },
-  dark: { base: 'rgb(88 64 46 / 0.08)', highlight: 'rgb(247 246 242 / 0.7)' },
-  animation: 'shimmer',
-  speed: 'slow',
-  radius: '6px',
-} as const
 
 const SAMPLE_YEARS = ['Soybeans', 'Wheat', 'Corn', 'Soybeans', 'Wheat']
 

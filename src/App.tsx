@@ -1,5 +1,6 @@
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Info } from "lucide-react";
+import { SkeletonBox } from "skullet/react";
 import AboutStep from "./components/AboutStep.tsx";
 import FieldReviewForm from "./components/FieldReviewForm.tsx";
 import LocationStep from "./components/LocationStep.tsx";
@@ -103,7 +104,7 @@ function App() {
 
         {step !== "location" && step !== "results" && location && (
         <main className={`field-workspace${step === "form" ? " field-workspace--form" : ""}`}>
-          <Suspense fallback={<div className="map-loading" role="status">Opening your field map…</div>}>
+          <Suspense fallback={<div className="field-map map-loading" role="status"><span className="sr-only">Opening your field map</span><SkeletonBox className="map-loading-box" width="100%" height="100%" radius={0} /></div>}>
             <Map
               ref={mapRef}
               onHoverField={setHighlightedId}

@@ -214,14 +214,20 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
       const controller = new AbortController()
       request = controller
       setStatus('loading')
+      // Draw each page as it arrives instead of waiting for the whole area.
+      const show = (features: FieldFeature[]) => {
+        void layersReady.then(() => {
+          if (controller.signal.aborted || disposed) return
+          const fresh = features.filter(f => !byId.has(String(f.properties.id)))
+          for (const f of fresh) byId.set(String(f.properties.id), f)
+          reveal?.add(fresh)
+        })
+      }
       try {
-        const features = await fetchFields(bbox, controller.signal)
+        await fetchFields(bbox, controller.signal, show)
         await layersReady
         if (controller.signal.aborted || disposed) return
-        const fresh = features.filter(f => !byId.has(String(f.properties.id)))
-        for (const f of features) byId.set(String(f.properties.id), f)
         loaded.push(bbox)
-        reveal?.add(fresh)
         setStatus('idle')
       } catch {
         if (!controller.signal.aborted) setStatus('error')
@@ -316,10 +322,11 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
       <div ref={ref} className="field-map-canvas fp-root" />
       <AddressSearch near={mapCenter} onPick={goTo} initialQuery={location?.label} />
       {children}
-      {status !== 'idle' && (
-        <div className="field-map-status" role={status === 'error' ? 'alert' : 'status'}>
+      {status === 'loading' && <div className="field-map-progress" aria-hidden="true" />}
+      <p className="sr-only" role="status">{status === 'loading' ? 'Loading fields' : status === 'zoom' ? 'Zoom in to see fields.' : ''}</p>
+      {(status === 'zoom' || status === 'error') && (
+        <div className="field-map-status" role={status === 'error' ? 'alert' : undefined}>
           {status === 'zoom' && <p>Zoom in to see fields.</p>}
-          {status === 'loading' && <p>Loading fields…</p>}
           {status === 'error' && (
             <>
               <p>Could not load fields.</p>

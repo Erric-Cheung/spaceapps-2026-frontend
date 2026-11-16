@@ -1,11 +1,14 @@
 import { lazy, Suspense, useState, type FormEvent } from 'react'
-import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import { SkeletonBox, Skeleton } from 'skullet/react'
 import type { FieldFeature } from '../data/fields'
 import type { CropHistoryResponse } from '../data/cropHistory'
 import { crops } from '../data/crops'
 import type { HistoryEntry } from '../data/cropHistoryCache'
 import { canConfirm, cropAnswer, EMPTY_REVIEW, OTHER_CROP, NO_CROP, UNKNOWN_CROP, type FieldReviewInput } from '../data/fieldReview'
+import { SAMPLE_SUGGESTION } from '../data/cropHistorySample'
 import BackButton from './BackButton'
+import CropHistoryEvidence from './CropHistoryEvidence'
 import FieldOutline from './FieldOutline'
 import StepNav from './StepNav'
 
@@ -35,9 +38,10 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
   const id = field.properties.id
   const result = history?.results.find(result => result.id === id)
   const fieldHistory = result?.history
-  const historyFailed = historyEntries[id]?.status === 'error'
+  const historyStatus = historyEntries[id]?.status
+  const historyFailed = historyStatus === 'error'
+  const historyLoading = !historyStatus || historyStatus === 'loading'
   const summary = fieldHistory?.summary
-  const latest = summary?.latestMapped
   const suggestion = summary?.currentCrop
   const suggestedCrop = suggestion?.crop
   const year = summary?.reviewYear
@@ -45,7 +49,6 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
   const input = !savedInput.crop && suggestedCrop ? { ...savedInput, crop: suggestedCrop } : savedInput
   const options = [...new Set([...crops, ...[suggestedCrop, input.crop].filter((crop): crop is string => typeof crop === 'string' && crop.length > 0 && !crop.startsWith('__'))])]
   const number = field.properties.selectionNumber ?? activeIndex + 1
-  const slots = summary?.recentYears ?? []
   const update = (patch: Partial<FieldReviewInput>) => onUpdate(id, { ...input, ...patch, confirmed: false })
   const confirm = () => {
     if (!canConfirm(input)) return
@@ -106,39 +109,26 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
           <div className='review-columns'>
             <div className='review-evidence'>
               <h4>What the crop maps show</h4>
-              {latest ? <>
-                <p className='review-mapped-crop'>{latest.groupLabel}<span>mapped in {latest.year}</span></p>
-                <p className='review-evidence-note'>{Math.round(latest.share * 100)}% of this outline was classified as {(latest.groupLabel).toLowerCase()}. This is a map estimate, not a confirmed crop record.</p>
-                <ol className='review-history-strip' aria-label='Recent mapped crops, oldest to newest'>
-                  {slots.map(({ year, observation }) => <li key={year} className={observation ? `crop-tone-${observation.group ?? 'other'}` : 'crop-unmapped'}>
-                    <span>{year}</span><strong>{observation ? observation.groupLabel : 'Not mapped'}</strong>
-                  </li>)}
-                </ol>
-                {fieldHistory?.summary?.pattern && <p className='review-pattern'>{fieldHistory.summary.pattern.text}</p>}
-              </> : <p className='review-no-history' role='status'>{historyFailed ? 'Crop history is unavailable. You can still confirm what grows here.' : fieldHistory ? fieldHistory.years.length ? 'Field analysis is unavailable. You can enter your crop.' : 'No crop maps are available for this field.' : 'Loading crop history. You can enter your crop now.'}</p>}
-              {historyFailed && !fieldHistory && <button type='button' className='button-secondary review-text-button' onClick={onRetryHistory}><RotateCcw size={16} aria-hidden='true' />Retry crop history</button>}
-
-              {fieldHistory && <details className='review-history-details'>
-                <summary>Full history and source</summary>
-                <table><caption>Mapped crop by year</caption><thead><tr><th>Year</th><th>Mapped crop</th><th>Share</th></tr></thead><tbody>
-                  {summary?.timeline.map(({ year, observation }) => <tr key={year}><td>{year}</td><td>{observation ? observation.groupLabel : 'Not mapped'}</td><td>{observation ? `${Math.round(observation.share * 100)}%` : ''}</td></tr>)}
-                </tbody></table>
-                {fieldHistory.source && <p><a href={fieldHistory.source.url} target='_blank' rel='noreferrer'>{fieldHistory.source.name}</a> · {fieldHistory.source.resolutionM} m classification</p>}
-                <p>{fieldHistory.note}</p>
-                {fieldHistory.summary?.notes.map(note => <p key={note}>{note}</p>)}
-              </details>}
-              <Suspense fallback={<p role='status'>Loading satellite imagery...</p>}>
+              <CropHistoryEvidence history={fieldHistory} loading={historyLoading} failed={historyFailed} onRetry={onRetryHistory} />
+              <Suspense fallback={<div className='imagery-chunk-loading' role='status'><span className='sr-only'>Loading satellite imagery</span><SkeletonBox className='imagery-chunk-box' width='100%' height={300} radius={12} /></div>}>
                 <FieldImagerySlider boundary={field.geometry} fieldId={id} fieldName={`Field ${number}`} showImagery />
               </Suspense>
             </div>
 
             <div className='review-answer'>
               <h4>{year ? `Your crop for ${year}` : 'Your latest-season crop'}</h4>
-              {suggestedCrop && <div className='review-suggestion'>
-                <p>{suggestion?.reason}</p>
-                {suggestion?.confidence && <p className='review-suggestion-reason'>Pattern support: {suggestion.confidence}.</p>}
-              </div>}
-              {suggestion?.status === 'unavailable' && <p className='review-no-history'>{suggestion.reason}</p>}
+              <Skeleton loading={historyLoading}>
+                {historyLoading ? <div className='review-suggestion'>
+                  <p>{SAMPLE_SUGGESTION.reason}</p>
+                  <p className='review-suggestion-reason'>Pattern support: high.</p>
+                </div> : <>
+                  {suggestedCrop && <div className='review-suggestion'>
+                    <p>{suggestion?.reason}</p>
+                    {suggestion?.confidence && <p className='review-suggestion-reason'>Pattern support: {suggestion.confidence}.</p>}
+                  </div>}
+                  {suggestion?.status === 'unavailable' && <p className='review-no-history'>{suggestion.reason}</p>}
+                </>}
+              </Skeleton>
               <label htmlFor='review-crop'>{suggestedCrop ? 'Crop' : 'What grew here in the latest season?'} <span className='required-mark' aria-hidden='true'>*</span></label>
               <select id='review-crop' required value={input.crop} onChange={event => update({ crop: event.target.value })}>
                 {!suggestedCrop && <option value=''>Choose a crop</option>}

@@ -27,8 +27,11 @@ type Page = FeatureCollection<Polygon | MultiPolygon, FieldProperties> & { hasMo
 const PAGE_SIZE = 2000
 const MAX_PAGES = 5
 
-/** Field outlines in `bbox` from GET /api/fields, following nextCursor. */
-export async function fetchFields(bbox: BBox, signal?: AbortSignal): Promise<FieldFeature[]> {
+/**
+ * Field outlines in `bbox` from GET /api/fields, following nextCursor.
+ * `onPage` receives each page as it arrives, so the map can draw fields before the last page.
+ */
+export async function fetchFields(bbox: BBox, signal?: AbortSignal, onPage?: (features: FieldFeature[]) => void): Promise<FieldFeature[]> {
   const features: FieldFeature[] = []
   let cursor: number | null = 0
   for (let page = 0; cursor !== null && page < MAX_PAGES; page++) {
@@ -36,6 +39,7 @@ export async function fetchFields(bbox: BBox, signal?: AbortSignal): Promise<Fie
     if (!res.ok) throw new Error(`Field API returned ${res.status}`)
     const data: Page = await res.json()
     features.push(...data.features)
+    onPage?.(data.features)
     cursor = data.hasMore ? data.nextCursor : null
   }
   return features

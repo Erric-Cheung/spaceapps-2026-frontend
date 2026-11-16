@@ -67,3 +67,44 @@
   background: var(--brand);
   box-shadow: 0 0 0 1px var(--brand-40);
 }
+
+/* Slim indeterminate bar while fields load; the map stays usable underneath.
+   Held back briefly so a fast load never flashes it. */
+.field-map-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  overflow: hidden;
+  z-index: 5;
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  animation: field-map-progress-show 0s linear .15s forwards;
+}
+.field-map-progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: var(--brand);
+  animation: field-map-progress-slide 1.2s ease-in-out infinite;
+}
+@keyframes field-map-progress-show { to { opacity: 1; } }
+@keyframes field-map-progress-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@keyframes field-map-progress-pulse {
+  from { opacity: .35; }
+  to { opacity: .8; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-map-progress::before {
+    width: 100%;
+    animation: field-map-progress-pulse 1.6s ease-in-out infinite alternate;
+  }
+}

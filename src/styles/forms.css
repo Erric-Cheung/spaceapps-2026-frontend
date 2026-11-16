@@ -44,6 +44,11 @@
 .review-history-strip .crop-unmapped { border-top-style: dotted; }
 .review-pattern { margin-top: 18px; font-size: 0.9375rem; color: var(--ink-muted); }
 .review-no-history { color: var(--ink-muted); font-size: 1rem; line-height: 1.6; }
+.review-history-status { margin-bottom: 14px; color: var(--ink-muted); font-size: 0.9375rem; }
+.review-history-status:empty { display: none; }
+.review-history-error { display: flex; flex-direction: column; }
+.imagery-chunk-loading { margin-top: 16px; }
+.imagery-chunk-box { display: block; }
 .review-history-details { margin-top: 16px; font-size: 0.875rem; color: var(--ink-muted); }
 .review-history-details summary { min-height: 44px; padding-block: 10px; cursor: pointer; }
 .review-history-details table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
