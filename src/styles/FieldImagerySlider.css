@@ -185,3 +185,11 @@
   outline: 2px solid #9a7420;
   outline-offset: -3px;
 }
+
+/* Touch screens: a taller track so the date slider is easy to grab. */
+@media (pointer: coarse) {
+  .imagery-track input {
+    min-height: 44px;
+    margin: 4px 0;
+  }
+}

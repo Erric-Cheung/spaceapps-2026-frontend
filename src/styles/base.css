@@ -5,6 +5,7 @@
 }
 
 body {
+    padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
     background: var(--paper);
     color: var(--ink);
     font-family: var(--font-sans);
@@ -104,4 +105,17 @@ fieldset {
     flex-direction: column;
     gap: .5rem;
     border: none;
+}
+
+/* Short screens (landscape phones): a slimmer header leaves room for the task. */
+@media (max-height: 560px) {
+    header {
+        padding-block: 6px;
+    }
+    .header-icon {
+        height: 2rem;
+    }
+    .header-title {
+        font-size: 1.5rem;
+    }
 }

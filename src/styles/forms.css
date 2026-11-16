@@ -86,7 +86,7 @@
     .review-field-state { display: none; }
     .review-title-row { align-items: flex-start; }
 }
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 560px) {
     .review-heading { padding: 8px 20px 14px; }
     .review-heading .step-header { margin-bottom: 8px; }
     .review-title-row { flex-direction: column; gap: 10px; }
@@ -99,7 +99,7 @@
     .review-field-list { padding: 10px 20px; border-right: 0; border-bottom: 1px solid var(--border); overflow: visible; }
     .review-field-list > button { display: none; }
     .review-mobile-field { display: flex; align-items: center; gap: 12px; font-size: 0.9375rem; }
-    .review-mobile-field select { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--paper-raised); color: var(--ink); font: inherit; }
+    .review-mobile-field select { flex: 1; min-width: 0; min-height: 44px; padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--paper-raised); color: var(--ink); font: inherit; font-size: 1rem; }
     .review-current { padding: 16px 20px 24px; scroll-padding-bottom: 24px; }
     .review-field-heading { margin-bottom: 20px; padding-bottom: 14px; }
     .review-field-heading .field-outline { width: 88px; height: 88px; }
@@ -108,20 +108,31 @@
     .review-answer { border-left: 0; border-top: 1px solid var(--border); padding: 20px 0 0; }
     .review-mapped-crop { font-size: 1.75rem; }
     .review-history-strip { margin-top: 20px; }
-    .review-actions { flex-direction: column; gap: 12px; padding: 12px 20px max(16px, env(safe-area-inset-bottom)); }
+    .review-actions { position: sticky; bottom: 0; z-index: 2; flex-direction: column; gap: 12px; padding: 12px 20px max(16px, env(safe-area-inset-bottom)); background: var(--paper); box-shadow: 0 -6px 12px -10px var(--shadow); }
     .review-paging { width: 100%; justify-content: space-between; gap: 12px; }
     .review-confirm-action { width: 100%; flex-direction: column; gap: 10px; }
     .review-primary { width: 100%; }
 }
 
-@media (min-width: 801px) {
+@media (min-width: 801px) and (min-height: 561px) {
     .review-field-heading { margin-bottom: 24px; padding-bottom: 18px; }
     .review-field-heading .field-outline { width: 88px; height: 88px; }
 }
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 560px) {
     .review-heading .step-header { gap: 8px 12px; }
     .review-field-heading { margin-bottom: 20px; padding-bottom: 12px; }
     .review-field-heading .field-outline { width: 72px; height: 72px; }
     .review-answer { grid-row: 1; border-top: 0; padding-top: 0; }
     .review-evidence { border-top: 1px solid var(--border); padding-top: 24px; }
+}
+
+/* Phones: one compact row (icon-only paging beside the main action) so the pinned bar stays short. */
+@media (max-width: 480px), (max-height: 560px) {
+    .review-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+    .review-paging { width: auto; gap: 6px; }
+    .review-paging > button { width: 44px; padding: 0; }
+    .review-paging-label, .review-all-confirmed { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .review-confirm-action { flex: 1; width: auto; min-width: 0; }
+    .review-primary { padding: 10px 12px; text-wrap: balance; }
+    .review-confirm-next { display: none; }
 }

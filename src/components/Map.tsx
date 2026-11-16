@@ -103,6 +103,8 @@ export default function Map({ ref: controlRef, onChange, onHoverField, location,
     })
     mapRef.current = map
     if (location?.place) showPlace(map, location.place, pinRef, 0)
+    // Compact attribution opens expanded and covers the bottom of a phone-sized map; start it collapsed.
+    map.once('load', () => container.querySelector('.maplibregl-ctrl-attrib.maplibregl-compact-show')?.classList.remove('maplibregl-compact-show'))
     map.touchZoomRotate.disableRotation()
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
     const resizeObserver = new ResizeObserver(() => map.resize())

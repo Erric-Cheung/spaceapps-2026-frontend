@@ -32,6 +32,19 @@
     border-radius: 0;
 }
 
+@media (max-width: 800px), (max-height: 560px) {
+    .field-workspace--form {
+        flex-direction: column;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .field-workspace--form .field-panel {
+        flex: 0 0 auto;
+        overflow: visible;
+    }
+}
+
 @media (max-width: 767px) {
     .field-workspace {
         flex-direction: column;

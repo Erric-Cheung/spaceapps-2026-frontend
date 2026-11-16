@@ -17,7 +17,7 @@ function StepNav({ current }: Props) {
         {steps.map((step, index) => (
           <li key={step.id}>
             {step.id === current
-              ? <span aria-current='step'>{index + 1}. {step.label}</span>
+              ? <span aria-current='step'><span className='step-nav-long'>Step </span>{index + 1}<span className='step-nav-long'> of {steps.length}</span>. {step.label}</span>
               : <span>{index + 1}. {step.label}</span>}
           </li>
         ))}

@@ -105,7 +105,7 @@ export default function FieldImagerySlider({ images: suppliedImages, bbox: suppl
     try {
       map = new maplibregl.Map({ container: container.current, style: basemapStyle(theme),
         bounds: [[fieldBounds[0], fieldBounds[1]], [fieldBounds[2], fieldBounds[3]]], fitBoundsOptions: { padding: 60 },
-        maxZoom: 19, interactive: false, renderWorldCopies: false,
+        maxZoom: 19, interactive: false, renderWorldCopies: false, attributionControl: { compact: true },
       })
     } catch {
       // Map construction reports unsupported WebGL synchronously.
@@ -133,6 +133,8 @@ export default function FieldImagerySlider({ images: suppliedImages, bbox: suppl
     map.on('move', update)
     map.on('resize', update)
     map.on('load', update)
+    // Compact attribution opens expanded over the field; start it collapsed.
+    map.once('load', () => container.current?.querySelector('.maplibregl-compact-show')?.classList.remove('maplibregl-compact-show'))
     const observer = new ResizeObserver(() => {
       map.resize()
       map.fitBounds([[fieldBounds[0], fieldBounds[1]], [fieldBounds[2], fieldBounds[3]]], { padding: 60, duration: 0 })

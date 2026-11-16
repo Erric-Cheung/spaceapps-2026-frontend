@@ -31,6 +31,15 @@
     text-decoration-thickness: 2px;
 }
 
+.step-nav-long { display: none; }
+
 @media (max-width: 650px) {
     .step-nav ol { gap: 14px; }
+}
+
+/* Phones: just the current step, as "Step 2 of 4. Fields". */
+@media (max-width: 480px) {
+    .step-nav li:not(:has([aria-current])) { display: none; }
+    .step-nav-long { display: inline; }
+    .step-nav [aria-current='step'] { text-decoration: none; }
 }

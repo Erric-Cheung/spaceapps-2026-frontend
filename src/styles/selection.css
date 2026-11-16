@@ -95,7 +95,7 @@
 }
 .selected-field-remove {
     flex-shrink: 0;
-    min-height: 40px;
+    min-height: 44px;
     padding: 6px 12px;
     font-size: 0.875rem;
 }
@@ -168,6 +168,9 @@
         display: none;
         padding: 0 20px 16px;
     }
+    .selection-list-hint {
+        margin-top: 12px;
+    }
     .selection-panel--expanded .selection-details {
         display: block;
         flex: 0 1 auto;
@@ -175,11 +178,45 @@
         overflow: visible;
     }
     .selection-actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
         padding: 12px 20px max(14px, env(safe-area-inset-bottom));
+        background: var(--paper);
+        box-shadow: 0 -6px 12px -10px var(--shadow);
     }
     .selection-panel {
         height: auto;
         max-height: none;
         font-size: 1rem;
+    }
+}
+
+/* Landscape phones and short windows: the side panel scrolls as one, with Continue pinned. */
+@media (min-width: 768px) and (max-height: 560px) {
+    .field-panel {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .selection-panel {
+        height: auto;
+        min-height: 100%;
+    }
+    .selection-heading {
+        padding-top: 14px;
+    }
+    .selection-heading .step-header {
+        margin-bottom: 12px;
+    }
+    .selection-details {
+        flex: none;
+        overflow: visible;
+    }
+    .selection-actions {
+        position: sticky;
+        bottom: 0;
+        margin-top: auto;
+        background: var(--paper);
+        box-shadow: 0 -6px 12px -10px var(--shadow);
     }
 }

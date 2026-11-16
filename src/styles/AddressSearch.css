@@ -74,3 +74,4 @@
 }
 
 .address-search-searching { color: var(--ink-muted); }
+.address-search-results li { min-height: 44px; justify-content: center; }

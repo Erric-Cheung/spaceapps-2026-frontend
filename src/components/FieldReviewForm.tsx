@@ -156,14 +156,14 @@ function FieldReviewForm({ fields, history, historyEntries, inputs, onUpdate, on
 
       <div className='review-actions'>
         <div className='review-paging'>
-          <button type='button' className='button-secondary' disabled={activeIndex === 0} onClick={() => setActiveId(fields[activeIndex - 1].properties.id)}><ChevronLeft size={18} aria-hidden='true' />Previous</button>
+          <button type='button' className='button-secondary' disabled={activeIndex === 0} onClick={() => setActiveId(fields[activeIndex - 1].properties.id)}><ChevronLeft size={18} aria-hidden='true' /><span className='review-paging-label'>Previous</span></button>
           <span>{activeIndex + 1} / {fields.length}</span>
-          <button type='button' className='button-secondary' disabled={activeIndex === fields.length - 1} onClick={() => setActiveId(fields[activeIndex + 1].properties.id)}>Next<ChevronRight size={18} aria-hidden='true' /></button>
+          <button type='button' className='button-secondary' disabled={activeIndex === fields.length - 1} onClick={() => setActiveId(fields[activeIndex + 1].properties.id)}><span className='review-paging-label'>Next</span><ChevronRight size={18} aria-hidden='true' /></button>
         </div>
         <div className='review-confirm-action'>
           {allConfirmed && <p className='review-all-confirmed' role='status'>All fields confirmed.</p>}
           {allConfirmed && onSubmit ? <button type='submit' className='button-primary review-primary'>Get crop rotation suggestions<ArrowRight size={18} aria-hidden='true' /></button> :
-            <button type='button' className='button-primary review-primary' disabled={!canConfirm(input) || input.confirmed} onClick={event => { event.preventDefault(); confirm() }}><Check size={18} aria-hidden='true' />{input.confirmed ? 'Field confirmed' : confirmedCount === fields.length - 1 ? 'Confirm field' : 'Confirm field and next'}</button>}
+            <button type='button' className='button-primary review-primary' disabled={!canConfirm(input) || input.confirmed} onClick={event => { event.preventDefault(); confirm() }}><Check size={18} aria-hidden='true' />{input.confirmed ? 'Field confirmed' : confirmedCount === fields.length - 1 ? 'Confirm field' : <>Confirm field<span className='review-confirm-next'> and next</span></>}</button>}
         </div>
       </div>
     </form>
