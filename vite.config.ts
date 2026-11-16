@@ -14,6 +14,11 @@ export default defineConfig(({ mode }) => {
           target: API_URL,
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api/, ''),
+          // The browser only talks to Vite, same-origin. Forwarding its Origin makes Spring
+          // treat proxied POSTs (crop history, planning) as cross-origin and reject them with 403.
+          configure: proxy => {
+            proxy.on('proxyReq', proxyReq => proxyReq.removeHeader('origin'))
+          },
         },
       },
     },
